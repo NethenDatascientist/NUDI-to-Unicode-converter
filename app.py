@@ -108,7 +108,167 @@ if "visit_tracked" not in st.session_state:
 # --- END TRACKER ---
 
 
-# --- OPTIMIZED TRANSLITERATION WITH CACHING ---
+# --- COMMON ENGLISH WORDS & ADMINISTRATIVE TERMS TO PRESERVE ---
+COMMON_ENGLISH_WORDS = {
+    "for",
+    "and",
+    "the",
+    "of",
+    "to",
+    "in",
+    "on",
+    "with",
+    "by",
+    "from",
+    "as",
+    "at",
+    "an",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "or",
+    "not",
+    "but",
+    "if",
+    "than",
+    "then",
+    "so",
+    "it",
+    "its",
+    "this",
+    "that",
+    "these",
+    "those",
+    "which",
+    "who",
+    "whom",
+    "whose",
+    "where",
+    "when",
+    "why",
+    "how",
+    "all",
+    "each",
+    "every",
+    "both",
+    "few",
+    "more",
+    "most",
+    "other",
+    "some",
+    "such",
+    "no",
+    "nor",
+    "too",
+    "very",
+    "can",
+    "will",
+    "just",
+    "should",
+    "now",
+    "also",
+    "into",
+    "over",
+    "after",
+    "up",
+    "out",
+    "down",
+    "off",
+    "again",
+    "further",
+    "once",
+    "here",
+    "there",
+    "any",
+    "only",
+    "own",
+    "same",
+    "central",
+    "state",
+    "share",
+    "scheme",
+    "project",
+    "total",
+    "grant",
+    "amount",
+    "district",
+    "taluk",
+    "irrigation",
+    "department",
+    "works",
+    "minor",
+    "major",
+    "estimated",
+    "cost",
+    "financial",
+    "year",
+    "years",
+    "lakhs",
+    "crores",
+    "rupees",
+    "rs",
+    "nos",
+    "no",
+    "sl",
+    "date",
+    "page",
+    "memo",
+    "reference",
+    "subject",
+    "description",
+    "sub",
+    "para",
+    "note",
+    "report",
+    "file",
+    "document",
+    "pmksy",
+    "smi",
+    "water",
+    "resource",
+    "resources",
+    "canal",
+    "canals",
+    "tank",
+    "tanks",
+    "lake",
+    "lakes",
+    "bridge",
+    "bridges",
+    "road",
+    "roads",
+    "building",
+    "buildings",
+    "office",
+    "officer",
+    "engineer",
+    "executive",
+    "assistant",
+    "junior",
+    "chief",
+    "superintending",
+    "secretary",
+    "minister",
+    "mla",
+    "mlc",
+    "honble",
+    "assembly",
+    "council",
+    "question",
+    "answer",
+    "annexure",
+    "karnataka",
+    "kalaburagi",
+    "yadgir",
+    "gulbarga",
+}
+
+
+# --- OPTIMIZED TRANSLITERATION WITH CACHING & ENGLISH PRESERVATION ---
 @functools.lru_cache(maxsize=20000)
 def transliterate_text_safely(text):
   if not isinstance(text, str) or not text.strip():
@@ -133,11 +293,21 @@ def transliterate_text_safely(text):
     if token.isspace() or token.startswith("_PROTECTED"):
       translated_tokens.append(token)
     else:
-      try:
-        conv = ascii_to_unicode(token)
-        translated_tokens.append(conv if conv else token)
-      except Exception:
-        translated_tokens.append(token)
+      cleaned_token = token.strip(".,;:!?()[]{}'\"-").lower()
+      # Check if token is an acronym, code, number/ID, or known English word
+      is_acronym_or_code = bool(
+          re.match(r"^[A-Z0-9\-\./]+$", token.strip())
+          or re.match(r"^[0-9\-\./]+$", token.strip())
+      )
+
+      if is_acronym_or_code or cleaned_token in COMMON_ENGLISH_WORDS:
+        translated_tokens.append(token)  # Keep original English text
+      else:
+        try:
+          conv = ascii_to_unicode(token)
+          translated_tokens.append(conv if conv else token)
+        except Exception:
+          translated_tokens.append(token)
 
   converted = "".join(translated_tokens)
 
@@ -191,11 +361,13 @@ def process_excel_document(input_path, output_path):
   for sheet in wb.worksheets:
     for row in sheet.iter_rows():
       for cell in row:
-        # Fast check: skip None and non-string types immediately
-        if cell.value and isinstance(cell.value, str):
-          val = cell.value.strip()
-          if val:
-            cell.value = transliterate_text_safely(val)
+        if cell.value is not None:
+          val_str = str(cell.value).strip()
+          # CRITICAL: Never touch Excel formulas (formulas start with '=')
+          if val_str.startswith("="):
+            continue
+          if isinstance(cell.value, str) and val_str:
+            cell.value = transliterate_text_safely(val_str)
 
   wb.save(output_path)
 
