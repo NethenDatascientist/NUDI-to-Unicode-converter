@@ -1,3 +1,5 @@
-streamlit>=1.38.0
-python-docx>=1.1.2
-openpyxl>=3.1.2
+streamlit
+python-docx
+pandas
+openpyxl
+kannada-ascii-unicode
