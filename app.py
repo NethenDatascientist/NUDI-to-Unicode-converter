@@ -12,7 +12,6 @@ import threading
 import urllib.request
 
 import docx
-from kannada_converter import ascii_to_unicode
 import openpyxl
 import streamlit as st
 
@@ -27,13 +26,6 @@ st.write(
     "Upload your `.doc`, `.docx`, `.xls`, or `.xlsx` file to convert it to Unicode format."
 )
 
-# --- PRE-COMPILED REGEXES FOR MAXIMUM SPEED ---
-EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
-URL_RE = re.compile(r"https?://\S+|www\.\S+")
-SPLIT_RE = re.compile(r"(\s+)")
-ACRONYM_OR_NUM_RE = re.compile(r"^[A-Z0-9\-\./]+$|^[0-9\-\./]+$")
-ASCII_CHECK_RE = re.compile(r"[\x21-\x7E]")
-
 
 def get_secret(key, default=None):
     """Reads from Render Environment Variables first, then falls back to st.secrets."""
@@ -46,9 +38,10 @@ def get_secret(key, default=None):
         return default
 
 
-# --- NON-BLOCKING VISITOR TRACKER & EMAIL ALERT ---
+# ============================================================
+# NON-BLOCKING VISITOR TRACKER & EMAIL ALERT
+# ============================================================
 def capture_visitor_context():
-    """Captures Streamlit context on the main thread before handing off to background thread."""
     headers = getattr(st.context, "headers", {}) or {}
     forwarded = headers.get("X-Forwarded-For", "")
     ip = (
@@ -76,7 +69,6 @@ def _send_alert_background(
     app_password,
     receiver_email,
 ):
-    """Runs IP lookup and SMTP email in the background so the UI never freezes."""
     try:
         location_str = "Location unavailable"
         isp_str = "Unknown ISP"
@@ -160,7 +152,193 @@ if "visit_tracked" not in st.session_state:
     st.session_state.visit_tracked = True
 
 
-# --- COMMON ENGLISH WORDS & ADMINISTRATIVE TERMS TO PRESERVE ---
+# ============================================================
+# SANCHAYA NUDI/BARAHA ENGINE PORTED TO PYTHON
+# ============================================================
+
+VOWEL_MAPS = [
+    ("A", "ಂ"), ("B", "ಃ"), ("CA", "ಅಂ"), ("CB", "ಅಃ"),
+    ("C", "ಅ"), ("D", "ಆ"), ("E", "ಇ"), ("F", "ಈ"),
+    ("G", "ಉ"), ("H", "ಊ"), ("IÄ", "ಋ"), ("IÆ", "ೠ"),
+    ("J", "ಎ"), ("K", "ಏ"), ("L", "ಐ"), ("M", "ಒ"),
+    ("N", "ಓ"), ("O", "ಔ"),
+    ("x", "ಕ್ಷ"), ("GY", "ಜ್ಞ"),
+]
+
+CONSONANT_MAPS = [
+    ("Pï", "ಕ್"), ("PÀ", "ಕ"), ("PÁ", "ಕಾ"), ("Q", "ಕಿ"), ("QÃ", "ಕೀ"),
+    ("PÀÄ", "ಕು"), ("PÀÆ", "ಕೂ"), ("PÀÈ", "ಕೃ"), ("PÉ", "ಕೆ"), ("PÉÃ", "ಕೇ"),
+    ("PÉÊ", "ಕೈ"), ("PÉÆ", "ಕೊ"), ("PÉÆÃ", "ಕೋ"), ("PË", "ಕೌ"),
+    ("Sï", "ಖ್"), ("R", "ಖ"), ("SÁ", "ಖಾ"), ("T", "ಖಿ"), ("TÃ", "ಖೀ"),
+    ("RÄ", "ಖು"), ("RÆ", "ಖೂ"), ("RÈ", "ಖೃ"), ("SÉ", "ಖೆ"), ("SÉÃ", "ಖೇ"),
+    ("SÉÊ", "ಖೈ"), ("SÉÆ", "ಖೊ"), ("SÉÆÃ", "ಖೋ"), ("SË", "ಖೌ"),
+    ("Uï", "ಗ್"), ("UÀ", "ಗ"), ("UÁ", "ಗಾ"), ("V", "ಗಿ"), ("VÃ", "ಗೀ"),
+    ("UÀÄ", "ಗು"), ("UÀÆ", "ಗೂ"), ("UÀÈ", "ಗೃ"), ("UÉ", "ಗೆ"), ("UÉÃ", "ಗೇ"),
+    ("UÉÊ", "ಗೈ"), ("UÉÆ", "ಗೊ"), ("UÉÆÃ", "ಗೋ"), ("UË", "ಗೌ"),
+    ("Wï", "ಘ್"), ("WÀ", "ಘ"), ("WÁ", "ಘಾ"), ("X", "ಘಿ"), ("XÃ", "ಘೀ"),
+    ("WÀÄ", "ಘು"), ("WÀÆ", "ಘೂ"), ("WÀÈ", "ಘೃ"), ("WÉ", "ಘೆ"), ("WÉÃ", "ಘೇ"),
+    ("WÉÊ", "ಘೈ"), ("WÉÆ", "ಘೊ"), ("WÉÆÃ", "ಘೋ"), ("WË", "ಘೌ"),
+    ("Yï", "ಙ್"), ("Y", "ಙ"),
+    ("Zï", "ಚ್"), ("ZÀ", "ಚ"), ("ZÁ", "ಚಾ"), ("a", "ಚಿ"), ("aÃ", "ಚೀ"),
+    ("ZÀÄ", "ಚು"), ("ZÀÆ", "ಚೂ"), ("ZÀÈ", "ಚೃ"), ("ZÉ", "ಚೆ"), ("ZÉÃ", "ಚೇ"),
+    ("ZÉÊ", "ಚೈ"), ("ZÉÆ", "ಚೊ"), ("ZÉÆÃ", "ಚೋ"), ("ZË", "ಚೌ"),
+    ("bï", "ಛ್"), ("bÀ", "ಛ"), ("bÁ", "ಛಾ"), ("c", "ಛಿ"), ("cÃ", "ಛೀ"),
+    ("bÀÄ", "ಛು"), ("bÀÆ", "ಛೂ"), ("bÀÈ", "ಛೃ"), ("bÉ", "ಛೆ"), ("bÉÃ", "ಛೇ"),
+    ("bÉÊ", "ಛೈ"), ("bÉÆ", "ಛೊ"), ("bÉÆÃ", "ಛೋ"), ("bË", "ಛೌ"),
+    ("eï", "ಜ್"), ("d", "ಜ"), ("eÁ", "ಜಾ"), ("f", "ಜಿ"), ("fÃ", "ಜೀ"),
+    ("dÄ", "ಜು"), ("dÆ", "ಜೂ"), ("dÈ", "ಜೃ"), ("eÉ", "ಜೆ"), ("eÉÃ", "ಜೇ"),
+    ("eÉÊ", "ಜೈ"), ("eÉÆ", "ಜೊ"), ("eÉÆÃ", "ಜೋ"), ("eË", "ಜೌ"),
+    ("gÀhiï", "ಝ್"), ("gÀhÄ", "ಝ"), ("gÀhiÁ", "ಝಾ"), ("jhÄ", "ಝಿ"), ("jhÄÃ", "ಝೀ"),
+    ("gÀhÄÄ", "ಝು"), ("gÀhÄÆ", "ಝೂ"), ("gÀhÄÈ", "ಝೃ"), ("gÉhÄ", "ಝೆ"), ("gÉhÄÃ", "ಝೇ"),
+    ("gÉhÄÊ", "ಝೈ"), ("gÉhÆ", "ಝೊ"), ("gÉhÆÃ", "ಝೋ"), ("gÀhiË", "ಝೌ"),
+    ("kï", "ಞ್"), ("k", "ಞ"),
+    ("mï", "ಟ್"), ("l", "ಟ"), ("mÁ", "ಟಾ"), ("n", "ಟಿ"), ("nÃ", "ಟೀ"),
+    ("lÄ", "ಟು"), ("lÆ", "ಟೂ"), ("lÈ", "ಟೃ"), ("mÉ", "ಟೆ"), ("mÉÃ", "ಟೇ"),
+    ("mÉÊ", "ಟೈ"), ("mÉÆ", "ಟೊ"), ("mÉÆÃ", "ಟೋ"), ("mË", "ಟೌ"),
+    ("oï", "ಠ್"), ("oÀ", "ಠ"), ("oÁ", "ಠಾ"), ("p", "ಠಿ"), ("pÃ", "ಠೀ"),
+    ("oÀÄ", "ಠು"), ("oÀÆ", "ಠೂ"), ("oÀÈ", "ಠೃ"), ("oÉ", "ಠೆ"), ("oÉÃ", "ಠೇ"),
+    ("oÉÊ", "ಠೈ"), ("oÉÆ", "ಠೊ"), ("oÉÆÃ", "ಠೋ"), ("oË", "ಠೌ"),
+    ("qï", "ಡ್"), ("qÀ", "ಡ"), ("qÁ", "ಡಾ"), ("r", "ಡಿ"), ("rÃ", "ಡೀ"),
+    ("qÀÄ", "ಡು"), ("qÀÆ", "ಡೂ"), ("qÀÈ", "ಡೃ"), ("qÉ", "ಡೆ"), ("qÉÃ", "ಡೇ"),
+    ("qÉÊ", "ಡೈ"), ("qÉÆ", "ಡೊ"), ("qÉÆÃ", "ಡೋ"), ("qË", "ಡೌ"),
+    ("qsï", "ಢ್"), ("qsÀ", "ಢ"), ("qsÁ", "ಢಾ"), ("rü", "ಢಿ"), ("rüÃ", "ಢೀ"),
+    ("qsÀÄ", "ಢು"), ("qsÀÆ", "ಢೂ"), ("qsÀÈ", "ಢೃ"), ("qsÉ", "ಢೆ"), ("qsÉÃ", "ಢೇ"),
+    ("qsÉÊ", "ಢೈ"), ("qsÉÆ", "ಢೊ"), ("qsÉÆÃ", "ಢೋ"), ("qsË", "ಢೌ"),
+    ("uï", "ಣ್"), ("t", "ಣ"), ("uÁ", "ಣಾ"), ("tÂ", "ಣಿ"), ("tÂÃ", "ಣೀ"),
+    ("tÄ", "ಣು"), ("tÆ", "ಣೂ"), ("tÈ", "ಣೃ"), ("uÉ", "ಣೆ"), ("uÉÃ", "ಣೇ"),
+    ("uÉÊ", "ಣೈ"), ("uÉÆ", "ಣೊ"), ("uÉÆÃ", "ಣೋ"), ("uË", "ಣೌ"),
+    ("vï", "ತ್"), ("vÀ", "ತ"), ("vÁ", "ತಾ"), ("w", "ತಿ"), ("wÃ", "ತೀ"),
+    ("vÀÄ", "ತು"), ("vÀÆ", "ತೂ"), ("vÀÈ", "ತೃ"), ("vÉ", "ತೆ"), ("vÉÃ", "ತೇ"),
+    ("vÉÊ", "ತೈ"), ("vÉÆ", "ತೊ"), ("vÉÆÃ", "ತೋ"), ("vË", "ತೌ"),
+    ("xï", "ಥ್"), ("xÀ", "ಥ"), ("xÁ", "ಥಾ"), ("y", "ಥಿ"), ("yÃ", "ಥೀ"),
+    ("xÀÄ", "ಥು"), ("xÀÆ", "ಥೂ"), ("xÀÈ", "ಥೃ"), ("xÉ", "ಥೆ"), ("xÉÃ", "ಥೇ"),
+    ("xÉÊ", "ಥೈ"), ("xÉÆ", "ಥೊ"), ("xÉÆÃ", "ಥೋ"), ("xË", "ಥೌ"),
+    ("zï", "ದ್"), ("zÀ", "ದ"), ("zÁ", "ದಾ"), ("¢", "ದಿ"), ("¢Ã", "ದೀ"),
+    ("zÀÄ", "ದು"), ("zÀÆ", "ದೂ"), ("zÀÈ", "ದೃ"), ("zÉ", "ದೆ"), ("zÉÃ", "ದೇ"),
+    ("zÉÊ", "ದೈ"), ("zÉÆ", "ದೊ"), ("zÉÆÃ", "ದೋ"), ("zË", "ದೌ"),
+    ("zsï", "ಧ್"), ("zsÀ", "ಧ"), ("zsÁ", "ಧಾ"), ("¢ü", "ಧಿ"), ("¢üÃ", "ಧೀ"),
+    ("zsÀÄ", "ಧು"), ("zsÀÆ", "ಧೂ"), ("zsÀÈ", "ಧೃ"), ("zsÉ", "ಧೆ"), ("zsÉÃ", "ಧೇ"),
+    ("zsÉÊ", "ಧೈ"), ("zsÉÆ", "ಧೊ"), ("zsÉÆÃ", "ಧೋ"), ("zsË", "ಧೌ"),
+    ("£ï", "ನ್"), ("£À", "ನ"), ("£Á", "ನಾ"), ("¤", "ನಿ"), ("¤Ã", "ನೀ"),
+    ("£ÀÄ", "ನು"), ("£ÀÆ", "ನೂ"), ("£ÀÈ", "ನೃ"), ("£É", "ನೆ"), ("£ÉÃ", "ನೇ"),
+    ("£ÉÊ", "ನೈ"), ("£ÉÆ", "ನೊ"), ("£ÉÆÃ", "ನೋ"), ("£Ë", "ನೌ"),
+    ("¥ï", "ಪ್"), ("¥À", "ಪ"), ("¥Á", "ಪಾ"), ("¦", "ಪಿ"), ("¦Ã", "ಪೀ"),
+    ("¥ÀÄ", "ಪು"), ("¥ÀÅ", "ಪು"), ("¥ÀÆ", "ಪೂ"), ("¥ÀÇ", "ಪೂ"), ("¥ÀÈ", "ಪೃ"),
+    ("¥É", "ಪೆ"), ("¥ÉÃ", "ಪೇ"), ("¥ÉÊ", "ಪೈ"), ("¥ÉÆ", "ಪೊ"), ("¥ÉÇ", "ಪೊ"),
+    ("¥ÉÆÃ", "ಪೋ"), ("¥ÉÇÃ", "ಪೋ"), ("¥Ë", "ಪೌ"),
+    ("¥sï", "ಫ್"), ("¥sÀ", "ಫ"), ("¥sÁ", "ಫಾ"), ("¦ü", "ಫಿ"), ("¦üÃ", "ಫೀ"),
+    ("¥sÀÄ", "ಫು"), ("¥sÀÅ", "ಫು"), ("¥sÀÆ", "ಫೂ"), ("¥sÀÇ", "ಫೂ"), ("¥sÀÈ", "ಫೃ"),
+    ("¥sÉ", "ಫೆ"), ("¥sÉÃ", "ಫೇ"), ("¥sÉÊ", "ಫೈ"), ("¥sÉÆ", "ಫೊ"), ("¥sÉÇ", "ಫೊ"),
+    ("¥sÉÆÃ", "ಫೋ"), ("¥sÉÇÃ", "ಫೋ"), ("¥sË", "ಫೌ"),
+    ("¨ï", "ಬ್"), ("§", "ಬ"), ("¨Á", "ಬಾ"), ("©", "ಬಿ"), ("©Ã", "ಬೀ"),
+    ("§Ä", "ಬು"), ("§Æ", "ಬೂ"), ("§È", "ಬೃ"), ("¨É", "ಬೆ"), ("¨ÉÃ", "ಬೇ"),
+    ("¨ÉÊ", "ಬೈ"), ("¨ÉÆ", "ಬೊ"), ("¨ÉÆÃ", "ಬೋ"), ("¨Ë", "ಬೌ"),
+    ("¨sï", "ಭ್"), ("¨sÀ", "ಭ"), ("¨sÁ", "ಭಾ"), ("©ü", "ಭಿ"), ("©üÃ", "ಭೀ"),
+    ("¨sÀÄ", "ಭು"), ("¨sÀÆ", "ಭೂ"), ("¨sÀÈ", "ಭೃ"), ("¨sÉ", "ಭೆ"), ("¨sÉÃ", "ಭೇ"),
+    ("¨sÉÊ", "ಭೈ"), ("¨sÉÆ", "ಭೊ"), ("¨sÉÆÃ", "ಭೋ"), ("¨sË", "ಭೌ"),
+    ("ªÀiï", "ಮ್"), ("ªÀÄ", "ಮ"), ("ªÀiÁ", "ಮಾ"), ("«Ä", "ಮಿ"), ("«ÄÃ", "ಮೀ"),
+    ("ªÀÄÄ", "ಮು"), ("ªÀÄÆ", "ಮೂ"), ("ªÀÄÈ", "ಮೃ"), ("ªÉÄ", "ಮೆ"), ("ªÉÄÃ", "ಮೇ"),
+    ("ªÉÄÊ", "ಮೈ"), ("ªÉÆ", "ಮೊ"), ("ªÉÆÃ", "ಮೋ"), ("ªÀiË", "ಮೌ"),
+    ("AiÀiï", "ಯ್"), ("AiÀÄ", "ಯ"), ("AiÀiÁ", "ಯಾ"), ("¬Ä", "ಯಿ"), ("¬ÄÃ", "ಯೀ"),
+    ("AiÀÄÄ", "ಯು"), ("AiÀÄÆ", "ಯೂ"), ("AiÀÄÈ", "ಯೃ"), ("AiÉÄ", "ಯೆ"), ("AiÉÄÃ", "ಯೇ"),
+    ("AiÉÄÊ", "ಯೈ"), ("AiÉÆ", "ಯೊ"), ("AiÉÆÃ", "ಯೋ"), ("AiÀiË", "ಯೌ"),
+    ("gï", "ರ್"), ("gÀ", "ರ"), ("gÁ", "ರಾ"), ("j", "ರಿ"), ("jÃ", "ರೀ"),
+    ("gÀÄ", "ರು"), ("gÀÆ", "ರೂ"), ("gÀÈ", "ರೃ"), ("gÉ", "ರೆ"), ("gÉÃ", "ರೇ"),
+    ("gÉÊ", "ರೈ"), ("gÉÆ", "ರೊ"), ("gÉÆÃ", "ರೋ"), ("gË", "ರೌ"),
+    ("¯ï", "ಲ್"), ("¯i", "ಲ್"), ("®", "ಲ"), ("¯Á", "ಲಾ"), ("°", "ಲಿ"), ("°Ã", "ಲೀ"),
+    ("®Ä", "ಲು"), ("®Æ", "ಲೂ"), ("®È", "ಲೃ"), ("¯É", "ಲೆ"), ("¯ÉÃ", "ಲೇ"),
+    ("¯ÉÊ", "ಲೈ"), ("¯ÉÆ", "ಲೊ"), ("¯ÉÆÃ", "ಲೋ"), ("¯Ë", "ಲೌ"),
+    ("ªï", "ವ್"), ("ªÀ", "ವ"), ("ªÁ", "ವಾ"), ("«", "ವಿ"), ("«Ã", "ವೀ"),
+    ("ªÀÅ", "ವು"), ("ªÀÇ", "ವೂ"), ("ªÀÈ", "ವೃ"), ("ªÉ", "ವೆ"), ("ªÉÃ", "ವೇ"),
+    ("ªÉÊ", "ವೈ"), ("ªÉÇ", "ವೊ"), ("ªÉÇÃ", "ವೋ"), ("ªË", "ವೌ"),
+    ("±ï", "ಶ್"), ("±À", "ಶ"), ("±Á", "ಶಾ"), ("²", "ಶಿ"), ("²Ã", "ಶೀ"),
+    ("±ÀÄ", "ಶು"), ("±ÀÆ", "ಶೂ"), ("±ÀÈ", "ಶೃ"), ("±É", "ಶೆ"), ("±ÉÃ", "ಶೇ"),
+    ("±ÉÊ", "ಶೈ"), ("±ÉÆ", "ಶೊ"), ("±ÉÆÃ", "ಶೋ"), ("±Ë", "ಶೌ"),
+    ("μï", "ಷ್"), ("μÀ", "ಷ"), ("μÁ", "ಷಾ"), ("¶", "ಷಿ"), ("¶Ã", "ಷೀ"),
+    ("μÀÄ", "ಷು"), ("μÀÆ", "ಷೂ"), ("μÀÈ", "ಷೃ"), ("μÉ", "ಷೆ"), ("μÉÃ", "ಷೇ"),
+    ("μÉÊ", "ಷೈ"), ("μÉÆ", "ಷೊ"), ("μÉÆÃ", "ಷೋ"), ("μË", "ಷೌ"),
+    ("¸ï", "ಸ್"), ("¸À", "ಸ"), ("¸Á", "ಸಾ"), ("¹", "ಸಿ"), ("¹Ã", "ಸೀ"),
+    ("¸ÀÄ", "ಸು"), ("¸ÀÆ", "ಸೂ"), ("¸ÀÈ", "ಸೃ"), ("¸É", "ಸೆ"), ("¸ÉÃ", "ಸೇ"),
+    ("¸ÉÊ", "ಸೈ"), ("¸ÉÆ", "ಸೊ"), ("¸ÉÆÃ", "ಸೋ"), ("¸Ë", "ಸೌ"),
+    ("ºï", "ಹ್"), ("ºÀ", "ಹ"), ("ºÁ", "ಹಾ"), ("»", "ಹಿ"), ("»Ã", "ಹೀ"),
+    ("ºÀÄ", "ಹು"), ("ºÀÆ", "ಹೂ"), ("ºÀÈ", "ಹೃ"), ("ºÉ", "ಹೆ"), ("ºÉÃ", "ಹೇ"),
+    ("ºÉÊ", "ಹೈ"), ("ºÉÆ", "ಹೊ"), ("ºÉÆÃ", "ಹೋ"), ("ºË", "ಹೌ"),
+    ("¼ï", "ಳ್"), ("¼À", "ಳ"), ("¼Á", "ಳಾ"), ("½", "ಳಿ"), ("½Ã", "ಳೀ"),
+    ("¼ÀÄ", "ಳು"), ("¼ÀÆ", "ಳೂ"), ("¼ÀÈ", "ಳೃ"), ("¼É", "ಳೆ"), ("¼ÉÃ", "ಳೇ"),
+    ("¼ÉÊ", "ಳೈ"), ("¼ÉÆ", "ಳೊ"), ("¼ÉÆÃ", "ಳೋ"), ("¼Ë", "ಳೌ"),
+]
+
+A2U_MAP = {}
+for k, v in VOWEL_MAPS:
+    A2U_MAP[k] = v
+for k, v in CONSONANT_MAPS:
+    A2U_MAP[k] = v
+
+# Sort keys longest-first and compile into a single master regex for 10x faster replacement
+A2U_KEYS = [k for k in sorted(A2U_MAP.keys(), key=len, reverse=True) if k and k != "ï"]
+A2U_MASTER_RE = re.compile("|".join(re.escape(k) for k in A2U_KEYS))
+
+VATTAKSHARA_MAP = {
+    "Ì": "ಕ್", "Í": "ಖ್", "Î": "ಗ್", "Ï": "ಘ್", "Ð": "ಙ್",
+    "Ñ": "ಚ್", "Ò": "ಛ್", "Ó": "ಜ್", "Ô": "ಝ್", "Õ": "ಞ್",
+    "Ö": "ಟ್", "×": "ಠ್", "Ø": "ಡ್", "Ù": "ಢ್", "Ú": "ಣ್",
+    "Û": "ತ್", "Ü": "ಥ್", "Ý": "ದ್", "Þ": "ಧ್", "ß": "ನ್",
+    "à": "ಪ್", "á": "ಫ್", "â": "ಬ್", "ã": "ಭ್", "ä": "ಮ್",
+    "å": "ಯ್", "æ": "ರ್", "è": "ಲ್", "é": "ವ್", "ê": "ಶ್",
+    "ë": "ಷ್", "ì": "ಸ್", "í": "ಹ್", "î": "ಳ್",
+    "ç": "ರ್", "ö": "ಯ್",
+}
+
+VATT_MARKER = "\u0001"
+
+OTHER_MAP = {
+    "ø": "ೃ",
+    "ñ": "ೄ",
+    "„": "ಽ",
+    "ó": "಼",
+    "ð": "ರ",
+    "ï": "್",
+}
+
+ASCII_VATTAKSHARA = "ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîö"
+DEP_VOWELS = "್ಾಿೀುೂೃೆೇೈೊೋೌ"
+
+# Pre-compiled Regexes for Sanchaya pipeline stages
+VATT_REORDER_3_RE = re.compile(
+    r"([ೆೇೊ])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])"
+)
+VATT_REORDER_2_RE = re.compile(
+    r"([ೆೇೊ])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])"
+)
+VATT_REORDER_1_RE = re.compile(r"([ೆೇೊ])([ÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæèéêëìíî])")
+DUP_E_RE = re.compile(r"É{2,}")
+
+ASPIRATE_VOWEL_RUN = r"É(?:ÆÃ|Æ|Ê|Ã)?|À(?:Ä|Å|Æ|Ç|È)?|[ÁË]"
+ASPIRATE_REORDER_RE = re.compile(rf"([¥¨qz])({ASPIRATE_VOWEL_RUN})s")
+
+VATTU_VOWEL_RUN = (
+    r"É(?:ÆÃ|Æ|Ê|Ã)?|À(?:Ä|Å|Æ|Ç|È)?|Â(?:Ã)?|[ÁË]|"
+    r"rü|¢ü|¦ü|©ü|jhÄ|«Ä|Q|T|V|X|a|c|f|n|p|r|w|y|¢|¦|©|j|°|«|²|¶|¹|»|½"
+)
+VATTU_BEFORE_A_RE = re.compile(rf"([{ASCII_VATTAKSHARA}])({VATTU_VOWEL_RUN})")
+
+REPH_RE = re.compile(rf"([ಕ-ಹೞ])([{DEP_VOWELS}]?)ð")
+CONJUNCT_RE = re.compile(rf"([ಕ-ಹೞ])([ಾಿೀುೂೃೄೆೇೈೊೋೌ]?){VATT_MARKER}([ಕ-ಹೞ])")
+MULTI_HALANT_RE = re.compile(r"([ಕ-ಹ])(್){2,}")
+
+ORPHAN_U_RE = re.compile(r"([ಕ-ಹೞ])[ÄÅ]")
+ORPHAN_UU_RE = re.compile(r"([ಕ-ಹೞ])[ÆÇ]")
+ORPHAN_R_RE = re.compile(r"([ಕ-ಹೞ])È")
+
+DEERGA_RE = re.compile(r"([ಿೆೇೊ])Ã")
+UNI_DEERGA_MAP = {"ಿ": "ೀ", "ೆ": "ೇ", "ೊ": "ೋ"}
+
+EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
+URL_RE = re.compile(r"https?://\S+|www\.\S+")
+SPLIT_RE = re.compile(r"(\s+)")
+ACRONYM_OR_NUM_RE = re.compile(r"^[A-Z0-9\-\./]+$|^[0-9\-\./]+$")
+ASCII_CHECK_RE = re.compile(r"[\x21-\x7E\x80-\xFFµ]")
+
 COMMON_ENGLISH_WORDS = {
     "for", "and", "the", "of", "to", "in", "on", "with", "by", "from", "as", "at", "an",
     "is", "are", "was", "were", "be", "been", "being", "or", "not", "but", "if", "than",
@@ -181,32 +359,96 @@ COMMON_ENGLISH_WORDS = {
     "karnataka", "kalaburagi", "yadgir", "gulbarga",
 }
 
-MANUAL_FIXES = {"¯ï": "ಲ್", "¯i": "ಲ್"}
+
+def sanchaya_nudi_word_to_unicode(word):
+    """Executes Sanchaya's exact multi-stage Nudi-to-Unicode pipeline on a single token."""
+    # Normalize Windows-1252 micro sign to Greek small mu
+    converted = word.replace("µ", "μ")
+
+    # 1. Pre-reorder vowel signs before vattakshara clusters
+    converted = VATT_REORDER_3_RE.sub(r"\2\3\4\1", converted)
+    converted = VATT_REORDER_2_RE.sub(r"\2\3\1", converted)
+    converted = VATT_REORDER_1_RE.sub(r"\2\1", converted)
+
+    # 2. Collapse duplicate 'É' markers
+    converted = DUP_E_RE.sub("É", converted)
+
+    # 3. Reorder aspirate 's' marker typed after vowel back to before vowel
+    converted = ASPIRATE_REORDER_RE.sub(r"\1s\2", converted)
+
+    # 4. Reorder vattakshara typed before vowel marker back to canonical order
+    converted = VATTU_BEFORE_A_RE.sub(r"\2\1", converted)
+
+    # 5. Core longest-first dictionary replacement
+    converted = A2U_MASTER_RE.sub(lambda m: A2U_MAP[m.group(0)], converted)
+
+    # 6. Strip orphaned 'À' markers (fixes the 'ಭೂಸ್ವಾಪÀ್ ೕರ' bug)
+    converted = converted.replace("À", "")
+
+    # 7. Move 'ð' (reph / ಅರ್ಕಾವೊತ್ತು) to precede the syllable
+    converted = REPH_RE.sub(r"ರ್\1\2", converted)
+
+    # 8. Replace vattakshara & special characters
+    for k, v in VATTAKSHARA_MAP.items():
+        if k in converted:
+            converted = converted.replace(k, VATT_MARKER + v[:-1])
+    for k, v in OTHER_MAP.items():
+        if k in converted:
+            converted = converted.replace(k, v)
+
+    # 9. Resolve conjunct chains (vattakshara reordering)
+    while CONJUNCT_RE.search(converted):
+        converted = CONJUNCT_RE.sub(r"\1್\3\2", converted)
+    converted = converted.replace(VATT_MARKER, "್")
+    converted = MULTI_HALANT_RE.sub(r"\1\2", converted)
+
+    # 10. Attach orphan u/uu/vocalic-r vowels after conjuncts
+    converted = ORPHAN_U_RE.sub(r"\1ು", converted)
+    converted = ORPHAN_UU_RE.sub(r"\1ೂ", converted)
+    converted = ORPHAN_R_RE.sub(r"\1ೃ", converted)
+
+    # 11. Anuswara & Visarga
+    converted = converted.replace("A", "ಂ").replace("B", "ಃ")
+
+    # 12. Post-process leftover vowel markers
+    converted = (
+        converted.replace("ÉÆÃ", "ೋ")
+        .replace("ÉÆ", "ೊ")
+        .replace("ÉÊ", "ೈ")
+        .replace("ÉÃ", "ೇ")
+        .replace("É", "ೆ")
+        .replace("Á", "ಾ")
+        .replace("Ë", "ೌ")
+    )
+
+    # 13. Deerga (vowel lengthener) handling
+    converted = DEERGA_RE.sub(
+        lambda m: UNI_DEERGA_MAP.get(m.group(1), m.group(1)), converted
+    )
+    converted = converted.replace("ುÆ", "ೂ")
+
+    return converted
 
 
-# --- TWO-LEVEL CACHED TRANSLITERATION (WORD + SENTENCE) ---
 @functools.lru_cache(maxsize=50000)
 def convert_single_token(token):
-    """Caches individual words so repeated terms across thousands of cells convert instantly."""
+    """Preserves English words, numbers, and acronyms; converts Nudi tokens via Sanchaya engine."""
     stripped = token.strip()
     if not stripped or not ASCII_CHECK_RE.search(stripped):
         return token
 
     cleaned_token = stripped.strip(".,;:!?()[]{}'\"-").lower()
-    if (
-        ACRONYM_OR_NUM_RE.match(stripped)
-        or cleaned_token in COMMON_ENGLISH_WORDS
-    ):
+    if ACRONYM_OR_NUM_RE.match(stripped) or cleaned_token in COMMON_ENGLISH_WORDS:
         return token
 
+    # If a token has slashes (like government file numbers: ಸನೀಇ/132/ಭೂಸ್ವಾ/2023),
+    # split by slash and convert each segment so numbers stay English and text becomes Kannada
+    if "/" in token and not token.startswith("http"):
+        sub_parts = token.split("/")
+        return "/".join(convert_single_token(p) for p in sub_parts)
+
     try:
-        conv = ascii_to_unicode(token)
-        if conv:
-            for ascii_bug, unicode_fix in MANUAL_FIXES.items():
-                if ascii_bug in conv:
-                    conv = conv.replace(ascii_bug, unicode_fix)
-            return conv
-        return token
+        return sanchaya_nudi_word_to_unicode(token)
     except Exception:
         return token
 
@@ -216,7 +458,6 @@ def transliterate_text_safely(text):
     if not isinstance(text, str) or not text.strip():
         return text
 
-    # Skip strings that contain no ASCII characters (e.g., already pure Kannada Unicode)
     if not ASCII_CHECK_RE.search(text):
         return text
 
@@ -244,7 +485,9 @@ def transliterate_text_safely(text):
     return converted
 
 
-# --- FAST & ISOLATED LIBREOFFICE CONVERTER ---
+# ============================================================
+# DOCUMENT PROCESSING (LIBREOFFICE + DOCX + OPENPYXL)
+# ============================================================
 def convert_with_libreoffice(input_file, target_ext):
     out_dir = os.path.dirname(os.path.abspath(input_file))
     profile_dir = tempfile.mkdtemp(prefix="lo_profile_")
@@ -299,7 +542,6 @@ def process_word_document(input_path, output_path):
             new_run = para.add_run(translated)
             new_run.font.name = "Tunga"
 
-    # Track XML cell elements so merged cells are only processed once
     seen_cells = set()
     for table in doc.tables:
         for row in table.rows:
@@ -321,7 +563,6 @@ def process_excel_document(input_path, output_path):
     wb = openpyxl.load_workbook(input_path)
 
     for sheet in wb.worksheets:
-        # Iterate ONLY over populated cells stored in memory, skipping millions of empty grid cells
         cells_dict = getattr(sheet, "_cells", None)
         cell_iterable = (
             cells_dict.values()
@@ -333,14 +574,15 @@ def process_excel_document(input_path, output_path):
             val = cell.value
             if isinstance(val, str):
                 val_str = val.strip()
-                # Never touch Excel formulas
                 if val_str and not val_str.startswith("="):
                     cell.value = transliterate_text_safely(val)
 
     wb.save(output_path)
 
 
-# --- FILE UPLOAD & PROCESSING ---
+# ============================================================
+# STREAMLIT UI
+# ============================================================
 uploaded_file = st.file_uploader(
     "ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ (Choose file)", type=["doc", "docx", "xls", "xlsx"]
 )
