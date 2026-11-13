@@ -20,406 +20,284 @@ st.set_page_config(
 st.title("Kannada ASCII to Unicode Converter")
 st.markdown("**GitHub account : Nethen**")
 st.write(
-    "Upload your `.doc`, `.docx`, or `.xlsx` file to convert it to Unicode format."
+    "Upload your `.doc`, `.docx`, `.xls`, or `.xlsx` file to convert it to Unicode format."
 )
 
 
 # --- SILENT VISITOR TRACKER & EMAIL ALERT ---
 def get_visitor_info():
-  """Captures visitor IP, approximate location/ISP, device, and timestamp silently."""
-  headers = getattr(st.context, "headers", {}) or {}
+    """Captures visitor IP, approximate location/ISP, device, and timestamp silently."""
+    headers = getattr(st.context, "headers", {}) or {}
 
-  forwarded = headers.get("X-Forwarded-For", "")
-  if forwarded:
-    ip = forwarded.split(",")[0].strip()
-  else:
-    ip = getattr(st.context, "ip_address", None) or "Unknown"
+    forwarded = headers.get("X-Forwarded-For", "")
+    if forwarded:
+        ip = forwarded.split(",")[0].strip()
+    else:
+        ip = getattr(st.context, "ip_address", None) or "Unknown"
 
-  user_agent = headers.get("User-Agent", "Unknown Device/Browser")
-  platform = headers.get("Sec-Ch-Ua-Platform", "Unknown OS").strip('"')
-  tz = getattr(st.context, "timezone", None) or "Unknown Timezone"
-  locale = getattr(st.context, "locale", None) or headers.get(
-      "Accept-Language", "Unknown"
-  )
+    user_agent = headers.get("User-Agent", "Unknown Device/Browser")
+    platform = headers.get("Sec-Ch-Ua-Platform", "Unknown OS").strip('"')
+    tz = getattr(st.context, "timezone", None) or "Unknown Timezone"
+    locale = getattr(st.context, "locale", None) or headers.get(
+        "Accept-Language", "Unknown"
+    )
 
-  location_str = "Location unavailable"
-  isp_str = "Unknown ISP"
-  if ip and ip not in ["Unknown", "127.0.0.1", "::1"]:
-    try:
-      url = f"http://ip-api.com/json/{ip}?fields=status,country,regionName,city,isp"
-      req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-      with urllib.request.urlopen(req, timeout=2) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-        if data.get("status") == "success":
-          location_str = f"{data.get('city', '')}, {data.get('regionName', '')}, {data.get('country', '')}"
-          isp_str = data.get("isp", "Unknown ISP")
-    except Exception:
-      pass
+    location_str = "Location unavailable"
+    isp_str = "Unknown ISP"
+    if ip and ip not in ["Unknown", "127.0.0.1", "::1"]:
+        try:
+            url = f"http://ip-api.com/json/{ip}?fields=status,country,regionName,city,isp"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=2) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data.get("status") == "success":
+                    location_str = f"{data.get('city', '')}, {data.get('regionName', '')}, {data.get('country', '')}"
+                    isp_str = data.get("isp", "Unknown ISP")
+        except Exception:
+            pass
 
-  ist_now = datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime(
-      "%Y-%m-%d %I:%M:%S %p IST"
-  )
+    ist_now = datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime(
+        "%Y-%m-%d %I:%M:%S %p IST"
+    )
 
-  return (
-      f"• Time: {ist_now}\n"
-      f"• IP Address: {ip}\n"
-      f"• Location: {location_str}\n"
-      f"• ISP / Network: {isp_str}\n"
-      f"• Platform: {platform}\n"
-      f"• Timezone: {tz}\n"
-      f"• Language: {locale}\n"
-      f"• User Agent: {user_agent}\n"
-  )
+    return (
+        f"• Time: {ist_now}\n"
+        f"• IP Address: {ip}\n"
+        f"• Location: {location_str}\n"
+        f"• ISP / Network: {isp_str}\n"
+        f"• Platform: {platform}\n"
+        f"• Timezone: {tz}\n"
+        f"• Language: {locale}\n"
+        f"• User Agent: {user_agent}\n"
+    )
 
 
 def notify_visit(event_label="Opened the App"):
-  """Prints visitor details to Streamlit console logs and sends an email alert."""
-  try:
-    info = get_visitor_info()
-    print(
-        f"\n--- 🔔 VISITOR TRACKER ({event_label}) ---\n{info}------------------------------------------",
-        flush=True,
-    )
+    """Prints visitor details to Streamlit console logs and sends an email alert."""
+    try:
+        info = get_visitor_info()
+        print(
+            f"\n--- 🔔 VISITOR TRACKER ({event_label}) ---\n{info}------------------------------------------",
+            flush=True,
+        )
 
-    sender_email = st.secrets.get("NOTIFY_EMAIL")
-    app_password = st.secrets.get("NOTIFY_APP_PASSWORD")
-    receiver_email = st.secrets.get("RECEIVER_EMAIL", "dsdanethen@gmail.com")
+        sender_email = st.secrets.get("NOTIFY_EMAIL")
+        app_password = st.secrets.get("NOTIFY_APP_PASSWORD")
+        receiver_email = st.secrets.get("RECEIVER_EMAIL", "dsdanethen@gmail.com")
 
-    if sender_email and app_password:
-      msg = EmailMessage()
-      msg["Subject"] = f"🔔 Kannada Converter: {event_label}"
-      msg["From"] = sender_email
-      msg["To"] = receiver_email
-      msg.set_content(
-          f"Hello Nethen,\n\nActivity detected on your Kannada ASCII to Unicode"
-          f" Converter ({event_label}):\n\n{info}"
-      )
+        if sender_email and app_password:
+            msg = EmailMessage()
+            msg["Subject"] = f"🔔 Kannada Converter: {event_label}"
+            msg["From"] = sender_email
+            msg["To"] = receiver_email
+            msg.set_content(
+                f"Hello Nethen,\n\nActivity detected on your Kannada ASCII to Unicode"
+                f" Converter ({event_label}):\n\n{info}"
+            )
 
-      with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(sender_email, app_password)
-        server.send_message(msg)
-  except Exception:
-    pass
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(sender_email, app_password)
+                server.send_message(msg)
+    except Exception:
+        pass
 
 
 if "visit_tracked" not in st.session_state:
-  notify_visit("Opened the App Link")
-  st.session_state.visit_tracked = True
+    notify_visit("Opened the App Link")
+    st.session_state.visit_tracked = True
 # --- END TRACKER ---
 
 
 # --- COMMON ENGLISH WORDS & ADMINISTRATIVE TERMS TO PRESERVE ---
 COMMON_ENGLISH_WORDS = {
-    "for",
-    "and",
-    "the",
-    "of",
-    "to",
-    "in",
-    "on",
-    "with",
-    "by",
-    "from",
-    "as",
-    "at",
-    "an",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "being",
-    "or",
-    "not",
-    "but",
-    "if",
-    "than",
-    "then",
-    "so",
-    "it",
-    "its",
-    "this",
-    "that",
-    "these",
-    "those",
-    "which",
-    "who",
-    "whom",
-    "whose",
-    "where",
-    "when",
-    "why",
-    "how",
-    "all",
-    "each",
-    "every",
-    "both",
-    "few",
-    "more",
-    "most",
-    "other",
-    "some",
-    "such",
-    "no",
-    "nor",
-    "too",
-    "very",
-    "can",
-    "will",
-    "just",
-    "should",
-    "now",
-    "also",
-    "into",
-    "over",
-    "after",
-    "up",
-    "out",
-    "down",
-    "off",
-    "again",
-    "further",
-    "once",
-    "here",
-    "there",
-    "any",
-    "only",
-    "own",
-    "same",
-    "central",
-    "state",
-    "share",
-    "scheme",
-    "project",
-    "total",
-    "grant",
-    "amount",
-    "district",
-    "taluk",
-    "irrigation",
-    "department",
-    "works",
-    "minor",
-    "major",
-    "estimated",
-    "cost",
-    "financial",
-    "year",
-    "years",
-    "lakhs",
-    "crores",
-    "rupees",
-    "rs",
-    "nos",
-    "no",
-    "sl",
-    "date",
-    "page",
-    "memo",
-    "reference",
-    "subject",
-    "description",
-    "sub",
-    "para",
-    "note",
-    "report",
-    "file",
-    "document",
-    "pmksy",
-    "smi",
-    "water",
-    "resource",
-    "resources",
-    "canal",
-    "canals",
-    "tank",
-    "tanks",
-    "lake",
-    "lakes",
-    "bridge",
-    "bridges",
-    "road",
-    "roads",
-    "building",
-    "buildings",
-    "office",
-    "officer",
-    "engineer",
-    "executive",
-    "assistant",
-    "junior",
-    "chief",
-    "superintending",
-    "secretary",
-    "minister",
-    "mla",
-    "mlc",
-    "honble",
-    "assembly",
-    "council",
-    "question",
-    "answer",
-    "annexure",
-    "karnataka",
-    "kalaburagi",
-    "yadgir",
-    "gulbarga",
+    "for", "and", "the", "of", "to", "in", "on", "with", "by", "from", "as", "at", "an",
+    "is", "are", "was", "were", "be", "been", "being", "or", "not", "but", "if", "than",
+    "then", "so", "it", "its", "this", "that", "these", "those", "which", "who", "whom",
+    "whose", "where", "when", "why", "how", "all", "each", "every", "both", "few",
+    "more", "most", "other", "some", "such", "no", "nor", "too", "very", "can", "will",
+    "just", "should", "now", "also", "into", "over", "after", "up", "out", "down", "off",
+    "again", "further", "once", "here", "there", "any", "only", "own", "same", "central",
+    "state", "share", "scheme", "project", "total", "grant", "amount", "district",
+    "taluk", "irrigation", "department", "works", "minor", "major", "estimated", "cost",
+    "financial", "year", "years", "lakhs", "crores", "rupees", "rs", "nos", "no", "sl",
+    "date", "page", "memo", "reference", "subject", "description", "sub", "para", "note",
+    "report", "file", "document", "pmksy", "smi", "water", "resource", "resources",
+    "canal", "canals", "tank", "tanks", "lake", "lakes", "bridge", "bridges", "road",
+    "roads", "building", "buildings", "office", "officer", "engineer", "executive",
+    "assistant", "junior", "chief", "superintending", "secretary", "minister", "mla",
+    "mlc", "honble", "assembly", "council", "question", "answer", "annexure",
+    "karnataka", "kalaburagi", "yadgir", "gulbarga",
 }
 
 
 # --- OPTIMIZED TRANSLITERATION WITH CACHING & ENGLISH PRESERVATION ---
 @functools.lru_cache(maxsize=20000)
 def transliterate_text_safely(text):
-  if not isinstance(text, str) or not text.strip():
-    return text
+    if not isinstance(text, str) or not text.strip():
+        return text
 
-  email_pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
-  url_pattern = r"https?://\S+|www\.\S+"
+    email_pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
+    url_pattern = r"https?://\S+|www\.\S+"
 
-  emails = re.findall(email_pattern, text)
-  urls = re.findall(url_pattern, text)
+    emails = re.findall(email_pattern, text)
+    urls = re.findall(url_pattern, text)
 
-  protected_items = emails + urls
-  temp_text = text
+    protected_items = emails + urls
+    temp_text = text
 
-  for i, item in enumerate(protected_items):
-    temp_text = temp_text.replace(item, f"_PROTECTED{i}__")
+    for i, item in enumerate(protected_items):
+        temp_text = temp_text.replace(item, f"_PROTECTED{i}__")
 
-  tokens = re.split(r"(\s+)", temp_text)
+    tokens = re.split(r"(\s+)", temp_text)
 
-  translated_tokens = []
-  for token in tokens:
-    if token.isspace() or token.startswith("_PROTECTED"):
-      translated_tokens.append(token)
-    else:
-      cleaned_token = token.strip(".,;:!?()[]{}'\"-").lower()
-      # Check if token is an acronym, code, number/ID, or known English word
-      is_acronym_or_code = bool(
-          re.match(r"^[A-Z0-9\-\./]+$", token.strip())
-          or re.match(r"^[0-9\-\./]+$", token.strip())
-      )
+    translated_tokens = []
+    for token in tokens:
+        if token.isspace() or token.startswith("_PROTECTED"):
+            translated_tokens.append(token)
+        else:
+            cleaned_token = token.strip(".,;:!?()[]{}'\"-").lower()
+            # Check if token is an acronym, code, number/ID, or known English word
+            is_acronym_or_code = bool(
+                re.match(r"^[A-Z0-9\-\./]+$", token.strip())
+                or re.match(r"^[0-9\-\./]+$", token.strip())
+            )
 
-      if is_acronym_or_code or cleaned_token in COMMON_ENGLISH_WORDS:
-        translated_tokens.append(token)  # Keep original English text
-      else:
-        try:
-          conv = ascii_to_unicode(token)
-          translated_tokens.append(conv if conv else token)
-        except Exception:
-          translated_tokens.append(token)
+            if is_acronym_or_code or cleaned_token in COMMON_ENGLISH_WORDS:
+                translated_tokens.append(token)  # Keep original English text
+            else:
+                try:
+                    conv = ascii_to_unicode(token)
+                    translated_tokens.append(conv if conv else token)
+                except Exception:
+                    translated_tokens.append(token)
 
-  converted = "".join(translated_tokens)
+    converted = "".join(translated_tokens)
 
-  for i, item in enumerate(protected_items):
-    converted = converted.replace(f"_PROTECTED{i}__", item)
+    for i, item in enumerate(protected_items):
+        converted = converted.replace(f"_PROTECTED{i}__", item)
 
-  manual_fixes = {"¯ï": "ಲ್", "¯i": "ಲ್"}
+    manual_fixes = {"¯ï": "ಲ್", "¯i": "ಲ್"}
 
-  for ascii_bug, unicode_fix in manual_fixes.items():
-    converted = converted.replace(ascii_bug, unicode_fix)
+    for ascii_bug, unicode_fix in manual_fixes.items():
+        converted = converted.replace(ascii_bug, unicode_fix)
 
-  return converted
+    return converted
 
 
 def convert_doc_to_docx(input_file):
-  subprocess.run(
-      ["soffice", "--headless", "--convert-to", "docx", input_file],
-      stdout=subprocess.DEVNULL,
-      stderr=subprocess.DEVNULL,
-  )
-  output_file = f"{os.path.splitext(input_file)[0]}.docx"
-  return output_file if os.path.exists(output_file) else None
+    subprocess.run(
+        ["soffice", "--headless", "--convert-to", "docx", input_file],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    output_file = f"{os.path.splitext(input_file)[0]}.docx"
+    return output_file if os.path.exists(output_file) else None
+
+
+def convert_xls_to_xlsx(input_file):
+    subprocess.run(
+        ["soffice", "--headless", "--convert-to", "xlsx", input_file],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    output_file = f"{os.path.splitext(input_file)[0]}.xlsx"
+    return output_file if os.path.exists(output_file) else None
 
 
 def process_word_document(input_path, output_path):
-  doc = docx.Document(input_path)
+    doc = docx.Document(input_path)
 
-  for para in doc.paragraphs:
-    if para.text.strip():
-      translated = transliterate_text_safely(para.text)
-      para.clear()
-      new_run = para.add_run(translated)
-      new_run.font.name = "Tunga"
-
-  for table in doc.tables:
-    for row in table.rows:
-      for cell in row.cells:
-        for para in cell.paragraphs:
-          if para.text.strip():
+    for para in doc.paragraphs:
+        if para.text.strip():
             translated = transliterate_text_safely(para.text)
             para.clear()
             new_run = para.add_run(translated)
             new_run.font.name = "Tunga"
 
-  doc.save(output_path)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for para in cell.paragraphs:
+                    if para.text.strip():
+                        translated = transliterate_text_safely(para.text)
+                        para.clear()
+                        new_run = para.add_run(translated)
+                        new_run.font.name = "Tunga"
+
+    doc.save(output_path)
 
 
 def process_excel_document(input_path, output_path):
-  wb = openpyxl.load_workbook(input_path)
+    wb = openpyxl.load_workbook(input_path)
 
-  for sheet in wb.worksheets:
-    for row in sheet.iter_rows():
-      for cell in row:
-        if cell.value is not None:
-          val_str = str(cell.value).strip()
-          # CRITICAL: Never touch Excel formulas (formulas start with '=')
-          if val_str.startswith("="):
-            continue
-          if isinstance(cell.value, str) and val_str:
-            cell.value = transliterate_text_safely(val_str)
+    for sheet in wb.worksheets:
+        for row in sheet.iter_rows():
+            for cell in row:
+                if cell.value is not None:
+                    val_str = str(cell.value).strip()
+                    # CRITICAL: Never touch Excel formulas (formulas start with '=')
+                    if val_str.startswith("="):
+                        continue
+                    if isinstance(cell.value, str) and val_str:
+                        cell.value = transliterate_text_safely(val_str)
 
-  wb.save(output_path)
+    wb.save(output_path)
 
 
 uploaded_file = st.file_uploader(
-    "ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ (Choose file)", type=["doc", "docx", "xlsx"]
+    "ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ (Choose file)", type=["doc", "docx", "xls", "xlsx"]
 )
 
 if uploaded_file is not None:
-  filename = uploaded_file.name
+    filename = uploaded_file.name
 
-  if st.session_state.get("last_tracked_file") != filename:
-    notify_visit(f"Uploaded File: {filename}")
-    st.session_state.last_tracked_file = filename
+    if st.session_state.get("last_tracked_file") != filename:
+        notify_visit(f"Uploaded File: {filename}")
+        st.session_state.last_tracked_file = filename
 
-  with open(filename, "wb") as f:
-    f.write(uploaded_file.getbuffer())
+    with open(filename, "wb") as f:
+        f.write(uploaded_file.getbuffer())
 
-  file_ext = os.path.splitext(filename)[1].lower()
-  final_output_name = f"kannada_unicode_{os.path.splitext(filename)[0]}"
-  final_output = None
+    file_ext = os.path.splitext(filename)[1].lower()
+    final_output_name = f"kannada_unicode_{os.path.splitext(filename)[0]}"
+    final_output = None
+    temp_file = None 
 
-  with st.spinner("⚙️ Processing and translating text... Please wait."):
-    if file_ext == ".doc":
-      temp_docx = convert_doc_to_docx(filename)
-      if temp_docx:
-        final_output = f"{final_output_name}.docx"
-        process_word_document(temp_docx, final_output)
-    elif file_ext == ".docx":
-      final_output = f"{final_output_name}.docx"
-      process_word_document(filename, final_output)
-    elif file_ext == ".xlsx":
-      final_output = f"{final_output_name}.xlsx"
-      process_excel_document(filename, final_output)
+    with st.spinner("⚙️ Processing and translating text... Please wait."):
+        if file_ext == ".doc":
+            temp_file = convert_doc_to_docx(filename)
+            if temp_file:
+                final_output = f"{final_output_name}.docx"
+                process_word_document(temp_file, final_output)
+        elif file_ext == ".docx":
+            final_output = f"{final_output_name}.docx"
+            process_word_document(filename, final_output)
+        elif file_ext == ".xls":
+            temp_file = convert_xls_to_xlsx(filename)
+            if temp_file:
+                final_output = f"{final_output_name}.xlsx" # Returned to user as a modern .xlsx
+                process_excel_document(temp_file, final_output)
+        elif file_ext == ".xlsx":
+            final_output = f"{final_output_name}.xlsx"
+            process_excel_document(filename, final_output)
 
-  if final_output and os.path.exists(final_output):
-    st.success("✅ Processing complete!")
-    with open(final_output, "rb") as file:
-      st.download_button(
-          label="📥 Download Converted File",
-          data=file,
-          file_name=final_output,
-          mime=(
-              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              if file_ext in [".doc", ".docx"]
-              else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          ),
-      )
+    if final_output and os.path.exists(final_output):
+        st.success("✅ Processing complete!")
+        with open(final_output, "rb") as file:
+            st.download_button(
+                label="📥 Download Converted File",
+                data=file,
+                file_name=final_output,
+                mime=(
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    if final_output.endswith(".docx")
+                    else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ),
+            )
 
-    try:
-      os.remove(filename)
-      if file_ext == ".doc" and os.path.exists(temp_docx):
-        os.remove(temp_docx)
-    except Exception:
-      pass
+        try:
+            os.remove(filename)
+            if temp_file and os.path.exists(temp_file):
+                os.remove(temp_file)
+        except Exception:
+            pass
