@@ -211,7 +211,7 @@ st.markdown(
 )
 
 # Custom Premium Header
-st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-title">M.I. - Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
 
 # Code Link (Elevated UI)
