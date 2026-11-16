@@ -17,17 +17,15 @@ import streamlit as st
 
 # Page configuration
 # Page configuration
-# Page configuration
-# Page configuration
 st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for a sleek Midnight Slate theme (reduces eye strain)
+# Advanced CSS for a premium SaaS Midnight theme
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     /* Global typography */
     html, body, [class*="css"] {
@@ -39,102 +37,144 @@ st.markdown(
         background-color: #0F172A !important;
     }
 
-    /* Dark mode card effect */
+    /* Premium Dark mode card effect */
     .block-container {
         background-color: #1E293B;
-        padding: 3.5rem 3rem 4rem 3rem;
-        border-radius: 16px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        padding: 4rem 3rem 4.5rem 3rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
         max-width: 750px;
         margin-top: 3rem;
         margin-bottom: 3rem;
-        border: 1px solid #334155;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* Typography styling */
+    /* Gradient Typography for Title to make it pop */
     .custom-title {
         text-align: center;
-        font-size: 2.25rem;
-        color: #F8FAFC;
-        margin-bottom: 0.75rem;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
         letter-spacing: -0.025em;
+        background: linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .custom-subtitle {
         text-align: center;
         color: #94A3B8;
         font-size: 1.05rem;
-        margin-bottom: 1.5rem;
+        font-weight: 400;
+        margin-bottom: 2rem;
+        line-height: 1.5;
     }
 
-    /* Labels and standard text */
-    label, .stMarkdown p {
-        color: #E2E8F0 !important;
-    }
-
-    /* GitHub Badge */
+    /* Upgraded Code Link Badge */
     .github-wrapper {
         text-align: center;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.5rem;
     }
     .github-badge {
         display: inline-flex;
         align-items: center;
-        background-color: #2563EB;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
         color: #FFFFFF !important;
-        padding: 0.5rem 1.2rem;
-        border-radius: 8px;
-        font-size: 0.9rem;
+        padding: 0.6rem 1.5rem;
+        border-radius: 9999px;
+        font-size: 0.95rem;
         font-weight: 600;
         text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        border: 1px solid rgba(255,255,255,0.1);
     }
     .github-badge:hover {
-        background-color: #1D4ED8;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
     }
 
     /* Tech Stack Tags */
     .tech-stack {
         display: flex;
         justify-content: center;
-        gap: 8px;
+        gap: 10px;
         flex-wrap: wrap;
-        margin-bottom: 3rem;
+        margin-bottom: 3.5rem;
     }
     .tech-badge {
-        background-color: #0F172A;
+        background-color: rgba(15, 23, 42, 0.6);
         color: #94A3B8;
-        padding: 4px 12px;
+        padding: 6px 14px;
         border-radius: 9999px;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         font-weight: 500;
         border: 1px solid #334155;
+        backdrop-filter: blur(4px);
     }
     .tech-badge.highlight {
-        border-color: #38BDF8;
+        border-color: rgba(56, 189, 248, 0.4);
         color: #38BDF8;
-        background-color: rgba(56, 189, 248, 0.1);
+        background-color: rgba(56, 189, 248, 0.05);
     }
 
-    /* Refined Dark File Uploader */
+    /* --- FIXING THE UPLOADER BOX --- */
+    
+    /* Uploader Label styling ("ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ...") */
+    [data-testid="stFileUploader"] label {
+        color: #E2E8F0 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* The Main Uploader Dropzone */
     [data-testid="stFileUploadDropzone"] {
         background-color: #0F172A !important;
         border: 2px dashed #475569 !important;
-        border-radius: 12px !important;
-        padding: 2.5rem !important;
-        transition: all 0.2s ease-in-out;
+        border-radius: 16px !important;
+        padding: 3rem !important;
+        transition: all 0.3s ease-in-out;
     }
     [data-testid="stFileUploadDropzone"]:hover {
         border-color: #38BDF8 !important;
-        background-color: #0C4A6E !important;
-    }
-    [data-testid="stFileUploadDropzone"] * {
-        color: #94A3B8 !important;
+        background-color: #0B1120 !important;
+        box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.05);
     }
     
+    /* The Text inside the Uploader ("Drag and drop file here") */
+    [data-testid="stFileUploadDropzone"] div, 
+    [data-testid="stFileUploadDropzone"] span {
+        color: #94A3B8 !important;
+    }
+
+    /* The 'Browse Files' button */
+    [data-testid="stFileUploadDropzone"] button {
+        background-color: #1E293B !important;
+        color: #F8FAFC !important;
+        border: 1px solid #475569 !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease;
+    }
+    [data-testid="stFileUploadDropzone"] button:hover {
+        background-color: #334155 !important;
+        border-color: #94A3B8 !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* The uploaded file card (after the user selects a file) */
+    [data-testid="stUploadedFile"] {
+        background-color: #0F172A !important;
+        border: 1px solid #334155 !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stUploadedFile"] * {
+        color: #E2E8F0 !important;
+    }
+
     /* Hide the default Streamlit anchor links next to headers */
     .st-emotion-cache-11r0fvl {
         display: none !important;
@@ -144,13 +184,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Custom UI Header
+# Custom Premium Header
 st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
 
-# Code Link
+# Code Link (Elevated UI)
 st.markdown(
-    '<div class="github-wrapper"><a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">👨‍💻 Code Link</a></div>',
+    '<div class="github-wrapper"><a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">👨‍💻 View Source Code</a></div>',
     unsafe_allow_html=True
 )
 
@@ -160,7 +200,7 @@ st.markdown(
     <div class="tech-stack">
         <span class="tech-badge">Python</span>
         <span class="tech-badge">Streamlit</span>
-        <span class="tech-badge highlight">⚙️ Logic: Sanka + Sanchaya Converting Logics</span>
+        <span class="tech-badge highlight">⚙️ Logic: Sanka + Sanchaya Processing</span>
     </div>
     ''',
     unsafe_allow_html=True
@@ -168,7 +208,6 @@ st.markdown(
 
 def get_secret(key, default=None):
     """Reads from Render Environment Variables first, then falls back to st.secrets."""
-
 # ============================================================
 # NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
 # ============================================================
