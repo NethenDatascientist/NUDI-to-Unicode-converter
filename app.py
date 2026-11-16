@@ -16,12 +16,44 @@ import openpyxl
 import streamlit as st
 
 # Page configuration
+# Page configuration
 st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
+# Basic CSS to force Light Mode directly from app.py
+st.markdown(
+    """
+    <style>
+    /* Force light background */
+    .stApp, .stAppViewContainer, [data-testid="stHeader"] {
+        background-color: #FAFAFA !important;
+    }
+    
+    /* Force dark text for titles, markdown, and labels */
+    h1, .stMarkdown, label {
+        color: #1E1E1E !important;
+    }
+    
+    /* Make the file uploader box light with a simple border */
+    [data-testid="stFileUploadDropzone"] {
+        background-color: #FFFFFF !important;
+        border: 1px dashed #B0B0B0 !important;
+    }
+    
+    /* Style the GitHub text slightly to look neat */
+    .github-text {
+        color: #4A4A4A;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.title("Kannada ASCII to Unicode Converter")
-st.markdown("**GitHub account : Nethen**")
+st.markdown('<div class="github-text">GitHub account : Nethen</div>', unsafe_allow_html=True)
 st.write(
     "Upload your `.doc`, `.docx`, `.xls`, or `.xlsx` file to convert it to Unicode format."
 )
