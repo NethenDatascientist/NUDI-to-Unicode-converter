@@ -37,9 +37,8 @@ def get_secret(key, default=None):
     except Exception:
         return default
 
-
 # ============================================================
-# NON-BLOCKING VISITOR TRACKER & EMAIL ALERT
+# NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
 # ============================================================
 def capture_visitor_context():
     headers = getattr(st.context, "headers", {}) or {}
@@ -49,81 +48,63 @@ def capture_visitor_context():
         if forwarded
         else (getattr(st.context, "ip_address", None) or "Unknown")
     )
-    user_agent = headers.get("User-Agent", "Unknown Device/Browser")
-    platform = headers.get("Sec-Ch-Ua-Platform", "Unknown OS").strip('"')
-    tz = getattr(st.context, "timezone", None) or "Unknown Timezone"
-    locale = getattr(st.context, "locale", None) or headers.get(
-        "Accept-Language", "Unknown"
-    )
-    return ip, user_agent, platform, tz, locale
-
+    user_agent = headers.get("User-Agent", "Unknown Browser")
+    os_platform = headers.get("Sec-Ch-Ua-Platform", "Unknown OS").strip('"')
+    mobile = "?1" in headers.get("Sec-Ch-Ua-Mobile", "")
+    device_type = "Mobile" if mobile else "Desktop"
+    tz = getattr(st.context, "timezone", None) or "Unknown TZ"
+    return ip, user_agent, f"{os_platform} ({device_type})", tz
 
 def _send_alert_background(
-    event_label,
-    ip,
-    user_agent,
-    platform,
-    tz,
-    locale,
-    sender_email,
-    app_password,
-    receiver_email,
+    file_info, ip, user_agent, sys_platform, tz, sender_email, app_password, receiver_email
 ):
     try:
-        location_str = "Location unavailable"
-        isp_str = "Unknown ISP"
+        loc_str = "Unknown Location"
         if ip and ip not in ["Unknown", "127.0.0.1", "::1"]:
             try:
-                url = f"http://ip-api.com/json/{ip}?fields=status,country,regionName,city,isp"
-                req = urllib.request.Request(
-                    url, headers={"User-Agent": "Mozilla/5.0"}
-                )
+                url = f"http://ip-api.com/json/{ip}?fields=status,city,regionName,isp"
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, timeout=2) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                     if data.get("status") == "success":
-                        location_str = f"{data.get('city', '')}, {data.get('regionName', '')}, {data.get('country', '')}"
-                        isp_str = data.get("isp", "Unknown ISP")
+                        loc_str = f"{data.get('city')}, {data.get('regionName')} ({data.get('isp')})"
             except Exception:
                 pass
 
         ist_now = datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime(
-            "%Y-%m-%d %I:%M:%S %p IST"
-        )
-        info = (
-            f"• Time: {ist_now}\n"
-            f"• IP Address: {ip}\n"
-            f"• Location: {location_str}\n"
-            f"• ISP / Network: {isp_str}\n"
-            f"• Platform: {platform}\n"
-            f"• Timezone: {tz}\n"
-            f"• Language: {locale}\n"
-            f"• User Agent: {user_agent}\n"
+            "%d-%b-%Y %I:%M %p IST"
         )
 
-        print(
-            f"\n--- 🔔 VISITOR TRACKER ({event_label}) ---\n{info}------------------------------------------",
-            flush=True,
+        short_body = (
+            f"File      : {file_info}\n"
+            f"Time      : {ist_now}\n"
+            f"System    : {sys_platform} | {tz}\n"
+            f"Location  : {loc_str} [{ip}]\n"
+            f"Browser   : {user_agent}\n"
         )
+
+        print(f"\n--- 🔔 ACTIVITY ---\n{short_body}-------------------", flush=True)
 
         if sender_email and app_password:
             msg = EmailMessage()
-            msg["Subject"] = f"🔔 Kannada Converter: {event_label}"
+            msg["Subject"] = f"🔤 File Converted: {file_info}"
             msg["From"] = sender_email
             msg["To"] = receiver_email
-            msg.set_content(
-                f"Hello Nethen,\n\nActivity detected on your Kannada ASCII to Unicode"
-                f" Converter ({event_label}):\n\n{info}"
-            )
+            msg.set_content(short_body)
+
             with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=5) as server:
                 server.login(sender_email, app_password)
                 server.send_message(msg)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Email error: {e}", flush=True) # Added temporary print for debugging
 
-
-def notify_visit(event_label="Opened the App"):
+def notify_file_upload(filename, file_size_bytes):
     try:
-        ip, user_agent, platform, tz, locale = capture_visitor_context()
+        size_kb = f"{file_size_bytes / 1024:.1f} KB"
+        file_info = f"{filename} ({size_kb})"
+        ip, user_agent, sys_platform, tz = capture_visitor_context()
+        
+        # Make sure these match exactly what you set in Render/Secrets
         sender_email = get_secret("NOTIFY_EMAIL")
         app_password = get_secret("NOTIFY_APP_PASSWORD")
         receiver_email = get_secret("RECEIVER_EMAIL", "dsdanethen@gmail.com")
@@ -131,27 +112,13 @@ def notify_visit(event_label="Opened the App"):
         threading.Thread(
             target=_send_alert_background,
             args=(
-                event_label,
-                ip,
-                user_agent,
-                platform,
-                tz,
-                locale,
-                sender_email,
-                app_password,
-                receiver_email,
+                file_info, ip, user_agent, sys_platform, tz, 
+                sender_email, app_password, receiver_email
             ),
             daemon=True,
         ).start()
     except Exception:
         pass
-
-
-if "visit_tracked" not in st.session_state:
-    notify_visit("Opened the App Link")
-    st.session_state.visit_tracked = True
-
-
 # ============================================================
 # SANCHAYA NUDI/BARAHA ENGINE PORTED TO PYTHON
 # ============================================================
@@ -591,7 +558,7 @@ if uploaded_file is not None:
     filename = uploaded_file.name
 
     if st.session_state.get("last_tracked_file") != filename:
-        notify_visit(f"Uploaded File: {filename}")
+        notify_file_upload(filename, uploaded_file.size)
         st.session_state.last_tracked_file = filename
 
     with st.spinner("⚙️ Processing and translating text... Please wait."):
