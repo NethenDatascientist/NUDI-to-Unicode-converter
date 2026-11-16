@@ -21,7 +21,7 @@ st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for a Premium Light Mode SaaS Theme
+# Advanced CSS for an Eye-Care / Warm Paper Theme
 st.markdown(
     """
     <style>
@@ -32,169 +32,173 @@ st.markdown(
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* Soft cool-gray background for the whole app */
-    .stApp, .stAppViewContainer, [data-testid="stHeader"] {
-        background-color: #F8FAFC !important;
+    /* HIDE STREAMLIT'S DEFAULT TOP HEADER & MENU TO REMOVE DEAD SPACE */
+    [data-testid="stHeader"] {
+        display: none !important;
     }
 
-    /* Premium Light Card effect */
+    /* Warm Sand background for the whole app to reduce glare */
+    .stApp, .stAppViewContainer {
+        background-color: #F4F1EB !important; 
+    }
+
+    /* COMPACT CARD EFFECT: Warm Ivory/Paper instead of Pure White */
     .block-container {
-        background-color: #FFFFFF;
-        padding: 4rem 3rem 4.5rem 3rem;
+        background-color: #FDFBF7 !important; /* Soft paper color */
+        padding: 2rem 2.5rem 2rem 2.5rem !important;
         border-radius: 20px;
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px -10px rgba(139, 126, 107, 0.15), 0 1px 3px rgba(139, 126, 107, 0.1);
         max-width: 750px;
-        margin-top: 3rem;
-        margin-bottom: 3rem;
-        border: 1px solid #F1F5F9;
+        margin-top: 2rem !important;
+        margin-bottom: 1rem !important;
+        border: 1px solid #F0EBE1;
     }
 
-    /* Deep Slate Typography for Title */
+    /* Warm Deep Espresso Typography for Title (No harsh blacks) */
     .custom-title {
         text-align: center;
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem; 
         letter-spacing: -0.025em;
-        background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+        background: linear-gradient(135deg, #2D2723 0%, #5C554F 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
     .custom-subtitle {
         text-align: center;
-        color: #64748B;
-        font-size: 1.05rem;
+        color: #736A62;
+        font-size: 1rem;
         font-weight: 400;
-        margin-bottom: 2rem;
-        line-height: 1.5;
+        margin-bottom: 1rem;
+        line-height: 1.4;
     }
 
-    /* Code Link Badge */
+    /* Calmer Muted Indigo Code Link Badge */
     .github-wrapper {
         text-align: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem; 
     }
     .github-badge {
         display: inline-flex;
         align-items: center;
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-        color: #FFFFFF !important;
-        padding: 0.6rem 1.5rem;
+        background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+        color: #FDFBF7 !important;
+        padding: 0.5rem 1.2rem;
         border-radius: 9999px;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.25);
+        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.2);
     }
     .github-badge:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
     }
 
-    /* Tech Stack Tags */
+    /* Tech Stack Tags - Earthy Paper tones */
     .tech-stack {
         display: flex;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 3.5rem;
+        margin-bottom: 1.5rem;
     }
     .tech-badge {
-        background-color: #F1F5F9;
-        color: #475569;
-        padding: 6px 14px;
+        background-color: #F0EBE1;
+        color: #5C554F;
+        padding: 4px 12px;
         border-radius: 9999px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #E6DFD3;
     }
     .tech-badge.highlight {
-        border-color: #BAE6FD;
-        color: #0284C7;
-        background-color: #F0F9FF;
+        border-color: #C7D2FE;
+        color: #4338CA;
+        background-color: #EEF2FF;
     }
 
     /* Fix General Text (Spinners, labels) */
     label, [data-testid="stSpinner"] div {
-        color: #1E293B !important;
+        color: #443F3B !important;
         font-weight: 600 !important;
     }
 
-    /* The Main Uploader Dropzone */
+    /* The Main Uploader Dropzone - Warm Beige */
     [data-testid="stFileUploadDropzone"] {
-        background-color: #F8FAFC !important;
-        border: 2px dashed #CBD5E1 !important;
+        background-color: #F4F1EB !important;
+        border: 2px dashed #D6D0C4 !important;
         border-radius: 16px !important;
-        padding: 3rem !important;
+        padding: 2rem !important; 
         transition: all 0.3s ease-in-out;
     }
     [data-testid="stFileUploadDropzone"]:hover {
-        border-color: #3B82F6 !important;
-        background-color: #EFF6FF !important;
+        border-color: #6366F1 !important;
+        background-color: #EEF2FF !important;
     }
     
-    /* The Text inside the Uploader */
     [data-testid="stFileUploadDropzone"] div, 
     [data-testid="stFileUploadDropzone"] span {
-        color: #64748B !important;
+        color: #736A62 !important;
     }
 
     /* The 'Browse Files' button */
     [data-testid="stFileUploadDropzone"] button {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        border: 1px solid #CBD5E1 !important;
+        background-color: #FDFBF7 !important;
+        color: #2D2723 !important;
+        border: 1px solid #D6D0C4 !important;
         border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
+        padding: 0.4rem 1rem !important;
         font-weight: 600 !important;
         transition: all 0.2s ease;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     [data-testid="stFileUploadDropzone"] button:hover {
-        background-color: #F1F5F9 !important;
-        border-color: #94A3B8 !important;
+        background-color: #F0EBE1 !important;
+        border-color: #A8A29A !important;
     }
     
     /* Uploaded File Card */
     [data-testid="stUploadedFile"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
+        background-color: #FDFBF7 !important;
+        border: 1px solid #E6DFD3 !important;
         border-radius: 10px !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
     }
     [data-testid="stUploadedFile"] * {
-        color: #0F172A !important;
+        color: #2D2723 !important;
     }
 
     /* Success Box Customization */
     [data-testid="stAlert"] {
-        background-color: #ECFDF5 !important;
-        border: 1px solid #A7F3D0 !important;
+        background-color: #EEFBEB !important;
+        border: 1px solid #BFEFB4 !important;
         border-radius: 10px !important;
-        color: #065F46 !important;
+        color: #2E5C23 !important;
     }
     [data-testid="stAlert"] div {
-        color: #065F46 !important;
+        color: #2E5C23 !important;
         font-weight: 500;
     }
 
     /* Download Button Alignment */
     [data-testid="baseButton-secondary"] {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-        border: 1px solid #CBD5E1 !important;
+        background-color: #FDFBF7 !important;
+        color: #2D2723 !important;
+        border: 1px solid #D6D0C4 !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
         transition: all 0.2s;
     }
     [data-testid="baseButton-secondary"]:hover {
-        border-color: #3B82F6 !important;
-        color: #3B82F6 !important;
-        background-color: #F8FAFC !important;
+        border-color: #4F46E5 !important;
+        color: #4F46E5 !important;
+        background-color: #EEF2FF !important;
     }
 
     /* Hide the default Streamlit anchor links next to headers */
