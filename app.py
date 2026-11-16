@@ -18,11 +18,12 @@ import streamlit as st
 # Page configuration
 # Page configuration
 # Page configuration
+# Page configuration
 st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for a modern, clean, high-readability SaaS look
+# Advanced CSS for a sleek Midnight Slate theme (reduces eye strain)
 st.markdown(
     """
     <style>
@@ -33,27 +34,28 @@ st.markdown(
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* Softer light background for the whole app */
+    /* Deep Slate background for the whole app */
     .stApp, .stAppViewContainer, [data-testid="stHeader"] {
-        background-color: #F8FAFC !important;
+        background-color: #0F172A !important;
     }
 
-    /* Create a central "card" effect for the main block */
+    /* Dark mode card effect */
     .block-container {
-        background-color: #FFFFFF;
+        background-color: #1E293B;
         padding: 3.5rem 3rem 4rem 3rem;
         border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
         max-width: 750px;
         margin-top: 3rem;
         margin-bottom: 3rem;
+        border: 1px solid #334155;
     }
 
     /* Typography styling */
     .custom-title {
         text-align: center;
         font-size: 2.25rem;
-        color: #0F172A;
+        color: #F8FAFC;
         margin-bottom: 0.75rem;
         font-weight: 700;
         letter-spacing: -0.025em;
@@ -61,65 +63,76 @@ st.markdown(
 
     .custom-subtitle {
         text-align: center;
-        color: #64748B;
+        color: #94A3B8;
         font-size: 1.05rem;
         margin-bottom: 1.5rem;
     }
 
-    /* Subtle GitHub Badge */
+    /* Labels and standard text */
+    label, .stMarkdown p {
+        color: #E2E8F0 !important;
+    }
+
+    /* GitHub Badge */
     .github-wrapper {
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 1.2rem;
     }
     .github-badge {
         display: inline-flex;
         align-items: center;
-        background-color: #F1F5F9;
-        color: #475569;
-        padding: 0.4rem 1.2rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        background-color: #2563EB;
+        color: #FFFFFF !important;
+        padding: 0.5rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
         text-decoration: none;
-        border: 1px solid #E2E8F0;
         transition: all 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
     }
     .github-badge:hover {
-        background-color: #E2E8F0;
-        color: #0F172A;
+        background-color: #1D4ED8;
+        transform: translateY(-1px);
     }
 
-    /* Refined File Uploader */
+    /* Tech Stack Tags */
+    .tech-stack {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 3rem;
+    }
+    .tech-badge {
+        background-color: #0F172A;
+        color: #94A3B8;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: 1px solid #334155;
+    }
+    .tech-badge.highlight {
+        border-color: #38BDF8;
+        color: #38BDF8;
+        background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Refined Dark File Uploader */
     [data-testid="stFileUploadDropzone"] {
-        background-color: #F8FAFC !important;
-        border: 2px dashed #CBD5E1 !important;
+        background-color: #0F172A !important;
+        border: 2px dashed #475569 !important;
         border-radius: 12px !important;
         padding: 2.5rem !important;
         transition: all 0.2s ease-in-out;
     }
     [data-testid="stFileUploadDropzone"]:hover {
-        border-color: #3B82F6 !important;
-        background-color: #EFF6FF !important;
+        border-color: #38BDF8 !important;
+        background-color: #0C4A6E !important;
     }
     [data-testid="stFileUploadDropzone"] * {
-        color: #475569 !important;
-    }
-
-    /* Download button styling */
-    [data-testid="baseButton-secondary"] {
-        background-color: #3B82F6 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 0.5rem 1.5rem !important;
-        font-weight: 500 !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        transition: all 0.2s;
-    }
-    [data-testid="baseButton-secondary"]:hover {
-        background-color: #2563EB !important;
-        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
-        transform: translateY(-1px);
+        color: #94A3B8 !important;
     }
     
     /* Hide the default Streamlit anchor links next to headers */
@@ -131,17 +144,31 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Custom UI Header (replaces st.title and st.write for better layout control)
+# Custom UI Header
 st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
+
+# Code Link
 st.markdown(
-    '<div class="github-wrapper"><a href="https://github.com/Nethen" target="_blank" class="github-badge">👨‍💻 GitHub : Nethen</a></div>',
+    '<div class="github-wrapper"><a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">👨‍💻 Code Link</a></div>',
     unsafe_allow_html=True
 )
 
-# ============================================================
-# NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
-# ============================================================
+# Tech Stack & Logic Details
+st.markdown(
+    '''
+    <div class="tech-stack">
+        <span class="tech-badge">Python</span>
+        <span class="tech-badge">Streamlit</span>
+        <span class="tech-badge highlight">⚙️ Logic: Sanka + Sanchaya Converting Logics</span>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
+
+def get_secret(key, default=None):
+    """Reads from Render Environment Variables first, then falls back to st.secrets."""
+
 # ============================================================
 # NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
 # ============================================================
