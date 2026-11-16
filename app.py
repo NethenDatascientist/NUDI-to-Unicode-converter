@@ -21,7 +21,7 @@ st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for a premium SaaS Midnight theme
+# Advanced CSS for a Premium Light Mode SaaS Theme
 st.markdown(
     """
     <style>
@@ -32,45 +32,45 @@ st.markdown(
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* Deep Slate background for the whole app */
+    /* Soft cool-gray background for the whole app */
     .stApp, .stAppViewContainer, [data-testid="stHeader"] {
-        background-color: #0F172A !important;
+        background-color: #F8FAFC !important;
     }
 
-    /* Premium Dark mode card effect */
+    /* Premium Light Card effect */
     .block-container {
-        background-color: #1E293B;
+        background-color: #FFFFFF;
         padding: 4rem 3rem 4.5rem 3rem;
         border-radius: 20px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
         max-width: 750px;
         margin-top: 3rem;
         margin-bottom: 3rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid #F1F5F9;
     }
 
-    /* Gradient Typography for Title to make it pop */
+    /* Deep Slate Typography for Title */
     .custom-title {
         text-align: center;
         font-size: 2.5rem;
         font-weight: 800;
         margin-bottom: 1rem;
         letter-spacing: -0.025em;
-        background: linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%);
+        background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
     .custom-subtitle {
         text-align: center;
-        color: #94A3B8;
+        color: #64748B;
         font-size: 1.05rem;
         font-weight: 400;
         margin-bottom: 2rem;
         line-height: 1.5;
     }
 
-    /* Upgraded Code Link Badge */
+    /* Code Link Badge */
     .github-wrapper {
         text-align: center;
         margin-bottom: 1.5rem;
@@ -86,12 +86,11 @@ st.markdown(
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
-        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.25);
     }
     .github-badge:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
         background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
     }
 
@@ -104,75 +103,98 @@ st.markdown(
         margin-bottom: 3.5rem;
     }
     .tech-badge {
-        background-color: rgba(15, 23, 42, 0.6);
-        color: #94A3B8;
+        background-color: #F1F5F9;
+        color: #475569;
         padding: 6px 14px;
         border-radius: 9999px;
         font-size: 0.8rem;
-        font-weight: 500;
-        border: 1px solid #334155;
-        backdrop-filter: blur(4px);
+        font-weight: 600;
+        border: 1px solid #E2E8F0;
     }
     .tech-badge.highlight {
-        border-color: rgba(56, 189, 248, 0.4);
-        color: #38BDF8;
-        background-color: rgba(56, 189, 248, 0.05);
+        border-color: #BAE6FD;
+        color: #0284C7;
+        background-color: #F0F9FF;
     }
 
-    /* --- FIXING THE UPLOADER BOX --- */
-    
-    /* Uploader Label styling ("ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ...") */
-    [data-testid="stFileUploader"] label {
-        color: #E2E8F0 !important;
+    /* Fix General Text (Spinners, labels) */
+    label, [data-testid="stSpinner"] div {
+        color: #1E293B !important;
         font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        margin-bottom: 0.5rem !important;
     }
 
     /* The Main Uploader Dropzone */
     [data-testid="stFileUploadDropzone"] {
-        background-color: #0F172A !important;
-        border: 2px dashed #475569 !important;
+        background-color: #F8FAFC !important;
+        border: 2px dashed #CBD5E1 !important;
         border-radius: 16px !important;
         padding: 3rem !important;
         transition: all 0.3s ease-in-out;
     }
     [data-testid="stFileUploadDropzone"]:hover {
-        border-color: #38BDF8 !important;
-        background-color: #0B1120 !important;
-        box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.05);
+        border-color: #3B82F6 !important;
+        background-color: #EFF6FF !important;
     }
     
-    /* The Text inside the Uploader ("Drag and drop file here") */
+    /* The Text inside the Uploader */
     [data-testid="stFileUploadDropzone"] div, 
     [data-testid="stFileUploadDropzone"] span {
-        color: #94A3B8 !important;
+        color: #64748B !important;
     }
 
     /* The 'Browse Files' button */
     [data-testid="stFileUploadDropzone"] button {
-        background-color: #1E293B !important;
-        color: #F8FAFC !important;
-        border: 1px solid #475569 !important;
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        border: 1px solid #CBD5E1 !important;
         border-radius: 8px !important;
         padding: 0.5rem 1rem !important;
         font-weight: 600 !important;
         transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     [data-testid="stFileUploadDropzone"] button:hover {
-        background-color: #334155 !important;
+        background-color: #F1F5F9 !important;
         border-color: #94A3B8 !important;
-        color: #FFFFFF !important;
     }
     
-    /* The uploaded file card (after the user selects a file) */
+    /* Uploaded File Card */
     [data-testid="stUploadedFile"] {
-        background-color: #0F172A !important;
-        border: 1px solid #334155 !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
         border-radius: 10px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
     }
     [data-testid="stUploadedFile"] * {
-        color: #E2E8F0 !important;
+        color: #0F172A !important;
+    }
+
+    /* Success Box Customization */
+    [data-testid="stAlert"] {
+        background-color: #ECFDF5 !important;
+        border: 1px solid #A7F3D0 !important;
+        border-radius: 10px !important;
+        color: #065F46 !important;
+    }
+    [data-testid="stAlert"] div {
+        color: #065F46 !important;
+        font-weight: 500;
+    }
+
+    /* Download Button Alignment */
+    [data-testid="baseButton-secondary"] {
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        transition: all 0.2s;
+    }
+    [data-testid="baseButton-secondary"]:hover {
+        border-color: #3B82F6 !important;
+        color: #3B82F6 !important;
+        background-color: #F8FAFC !important;
     }
 
     /* Hide the default Streamlit anchor links next to headers */
