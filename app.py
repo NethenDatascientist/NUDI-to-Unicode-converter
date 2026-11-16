@@ -17,58 +17,131 @@ import streamlit as st
 
 # Page configuration
 # Page configuration
+# Page configuration
 st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Basic CSS to force Light Mode directly from app.py
+# Advanced CSS for a modern, clean, high-readability SaaS look
 st.markdown(
     """
     <style>
-    /* Force light background */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    /* Global typography */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    /* Softer light background for the whole app */
     .stApp, .stAppViewContainer, [data-testid="stHeader"] {
-        background-color: #FAFAFA !important;
+        background-color: #F8FAFC !important;
     }
-    
-    /* Force dark text for titles, markdown, and labels */
-    h1, .stMarkdown, label {
-        color: #1E1E1E !important;
+
+    /* Create a central "card" effect for the main block */
+    .block-container {
+        background-color: #FFFFFF;
+        padding: 3.5rem 3rem 4rem 3rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        max-width: 750px;
+        margin-top: 3rem;
+        margin-bottom: 3rem;
     }
-    
-    /* Make the file uploader box light with a simple border */
-    [data-testid="stFileUploadDropzone"] {
-        background-color: #FFFFFF !important;
-        border: 1px dashed #B0B0B0 !important;
+
+    /* Typography styling */
+    .custom-title {
+        text-align: center;
+        font-size: 2.25rem;
+        color: #0F172A;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
     }
-    
-    /* Style the GitHub text slightly to look neat */
-    .github-text {
-        color: #4A4A4A;
+
+    .custom-subtitle {
+        text-align: center;
+        color: #64748B;
+        font-size: 1.05rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Subtle GitHub Badge */
+    .github-wrapper {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .github-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: #F1F5F9;
+        color: #475569;
+        padding: 0.4rem 1.2rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
         font-weight: 500;
-        margin-bottom: 1rem;
+        text-decoration: none;
+        border: 1px solid #E2E8F0;
+        transition: all 0.2s ease;
+    }
+    .github-badge:hover {
+        background-color: #E2E8F0;
+        color: #0F172A;
+    }
+
+    /* Refined File Uploader */
+    [data-testid="stFileUploadDropzone"] {
+        background-color: #F8FAFC !important;
+        border: 2px dashed #CBD5E1 !important;
+        border-radius: 12px !important;
+        padding: 2.5rem !important;
+        transition: all 0.2s ease-in-out;
+    }
+    [data-testid="stFileUploadDropzone"]:hover {
+        border-color: #3B82F6 !important;
+        background-color: #EFF6FF !important;
+    }
+    [data-testid="stFileUploadDropzone"] * {
+        color: #475569 !important;
+    }
+
+    /* Download button styling */
+    [data-testid="baseButton-secondary"] {
+        background-color: #3B82F6 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1.5rem !important;
+        font-weight: 500 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    [data-testid="baseButton-secondary"]:hover {
+        background-color: #2563EB !important;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        transform: translateY(-1px);
+    }
+    
+    /* Hide the default Streamlit anchor links next to headers */
+    .st-emotion-cache-11r0fvl {
+        display: none !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.title("Kannada ASCII to Unicode Converter")
-st.markdown('<div class="github-text">GitHub account : Nethen</div>', unsafe_allow_html=True)
-st.write(
-    "Upload your `.doc`, `.docx`, `.xls`, or `.xlsx` file to convert it to Unicode format."
+# Custom UI Header (replaces st.title and st.write for better layout control)
+st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="github-wrapper"><a href="https://github.com/Nethen" target="_blank" class="github-badge">👨‍💻 GitHub : Nethen</a></div>',
+    unsafe_allow_html=True
 )
 
-
-def get_secret(key, default=None):
-    """Reads from Render Environment Variables first, then falls back to st.secrets."""
-    val = os.environ.get(key)
-    if val:
-        return val
-    try:
-        return st.secrets.get(key, default)
-    except Exception:
-        return default
-
+# ============================================================
+# NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
+# ============================================================
 # ============================================================
 # NON-BLOCKING VISITOR TRACKER & SHORT EMAIL ALERT
 # ============================================================
