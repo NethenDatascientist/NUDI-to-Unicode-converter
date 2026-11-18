@@ -21,219 +21,319 @@ st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for a Minimalist Professional SaaS Theme
+# Animated, Eye-Friendly Professional SaaS Theme
 st.markdown(
     """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    /* Global typography */
-    html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
+/* Global Typography */
+html, body, [class*="css"] {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
 
-    /* Hide Streamlit header for a clean app-like feel */
-    [data-testid="stHeader"] {
-        display: none !important;
-    }
+/* 1. Remove Top Header & Footer for Zero-Scroll Layout */
+[data-testid="stHeader"], footer {
+    display: none !important;
+}
 
-    /* Ultra-subtle light gray background for the app */
-    .stApp, .stAppViewContainer {
-        background-color: #F9FAFB !important; 
-    }
+/* 2. Keyframe Animations */
+@keyframes ambientBg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
-    /* The Main App Card - Clean, sharp, subtle shadow */
-    .block-container {
-        background-color: #FFFFFF !important;
-        padding: 2.5rem 3rem 3rem 3rem !important;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
-        max-width: 720px;
-        margin-top: 2.5rem !important;
-        margin-bottom: 2rem !important;
-        border: 1px solid #E5E7EB;
-    }
+@keyframes cardReveal {
+    0% { opacity: 0; transform: translateY(18px) scale(0.985); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-    /* Professional, crisp typography */
-    .custom-title {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        color: #111827; /* Deep charcoal, easier on the eyes than pure black */
-        margin-bottom: 0.5rem; 
-        letter-spacing: -0.02em;
-    }
+@keyframes staggerFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
 
-    .custom-subtitle {
-        text-align: center;
-        color: #6B7280;
-        font-size: 0.95rem;
-        font-weight: 400;
-        margin-bottom: 1.5rem;
-        line-height: 1.5;
-    }
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { transform: scale(1.1); opacity: 0.85; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
 
-    /* Sleek "GitHub/Vercel" style Code Link Button */
-    .github-wrapper {
-        text-align: center;
-        margin-bottom: 1.25rem; 
-    }
-    .github-badge {
-        display: inline-flex;
-        align-items: center;
-        background-color: #111827;
-        color: #FFFFFF !important;
-        padding: 0.4rem 1rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-    .github-badge:hover {
-        background-color: #374151;
-        transform: translateY(-1px);
-    }
+@keyframes ctaPulse {
+    0% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); }
+    50% { box-shadow: 0 6px 22px rgba(37, 99, 235, 0.45); }
+    100% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25); }
+}
 
-    /* Tech Stack Tags - Clean minimalist pills */
-    .tech-stack {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-    }
-    .tech-badge {
-        background-color: #F3F4F6;
-        color: #4B5563;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        border: 1px solid #E5E7EB;
-    }
-    .tech-badge.highlight {
-        border-color: #D1D5DB;
-        color: #111827;
-        background-color: #FFFFFF;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
+/* 3. Warm Eye-Comfort Animated Mesh Background (No Harsh Glare) */
+.stApp, .stAppViewContainer {
+    background: linear-gradient(-45deg, #EAE6DF, #E2E8F0, #E8ECEF, #EFECE6) !important;
+    background-size: 300% 300% !important;
+    animation: ambientBg 18s ease infinite !important;
+}
 
-    /* Fix General Text */
-    label, [data-testid="stSpinner"] div {
-        color: #374151 !important;
-        font-weight: 500 !important;
-        font-size: 0.9rem !important;
-    }
+/* 4. Frosted Alabaster Main Card */
+.block-container {
+    background: rgba(248, 246, 242, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    padding: 2rem 2.75rem 2.25rem 2.75rem !important;
+    border-radius: 20px !important;
+    box-shadow: 
+        0 20px 45px -15px rgba(30, 41, 59, 0.09),
+        0 4px 12px -2px rgba(30, 41, 59, 0.04),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.7) !important;
+    max-width: 720px !important;
+    margin-top: 1.6rem !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid rgba(203, 213, 225, 0.65) !important;
+    animation: cardReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-    /* The Main Uploader Dropzone - Professional and inviting */
-    [data-testid="stFileUploadDropzone"] {
-        background-color: #FAFAFA !important;
-        border: 1px dashed #D1D5DB !important;
-        border-radius: 8px !important;
-        padding: 2rem !important; 
-        transition: all 0.2s ease-in-out;
-    }
-    [data-testid="stFileUploadDropzone"]:hover {
-        border-color: #3B82F6 !important;
-        background-color: #EFF6FF !important;
-    }
-    
-    [data-testid="stFileUploadDropzone"] div, 
-    [data-testid="stFileUploadDropzone"] span {
-        color: #6B7280 !important;
-    }
+/* 5. Header & Title Styling */
+.hero-wrap {
+    text-align: center;
+    animation: staggerFade 0.6s ease-out 0.1s both;
+}
 
-    /* The 'Browse Files' button */
-    [data-testid="stFileUploadDropzone"] button {
-        background-color: #FFFFFF !important;
-        color: #111827 !important;
-        border: 1px solid #D1D5DB !important;
-        border-radius: 6px !important;
-        padding: 0.35rem 0.8rem !important;
-        font-weight: 500 !important;
-        font-size: 0.875rem !important;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
-    [data-testid="stFileUploadDropzone"] button:hover {
-        background-color: #F9FAFB !important;
-        border-color: #9CA3AF !important;
-    }
-    
-    /* Uploaded File Card */
-    [data-testid="stUploadedFile"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E5E7EB !important;
-        border-radius: 6px !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
-    }
-    [data-testid="stUploadedFile"] * {
-        color: #111827 !important;
-    }
+.custom-title {
+    font-size: 2.15rem;
+    font-weight: 800;
+    margin-bottom: 0.45rem;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 55%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-    /* Success Box Customization - Corporate green */
-    [data-testid="stAlert"] {
-        background-color: #F0FDF4 !important;
-        border: 1px solid #BBF7D0 !important;
-        border-radius: 6px !important;
-        color: #166534 !important;
-        padding: 0.75rem !important;
-    }
-    [data-testid="stAlert"] div {
-        color: #166534 !important;
-        font-weight: 500;
-    }
+.custom-subtitle {
+    color: #57606A;
+    font-size: 0.96rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+}
 
-    /* Download Button - Primary CTA styling */
-    [data-testid="baseButton-secondary"] {
-        background-color: #2563EB !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 6px !important;
-        font-weight: 500 !important;
-        font-size: 0.875rem !important;
-        padding: 0.5rem 1rem !important;
-        box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1) !important;
-        transition: all 0.2s;
-    }
-    [data-testid="baseButton-secondary"]:hover {
-        background-color: #1D4ED8 !important;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
-        transform: translateY(-1px);
-    }
+/* 6. Interactive GitHub Source Button (Fixes Link Underline) */
+.github-wrapper {
+    text-align: center;
+    margin-bottom: 1.15rem;
+    animation: staggerFade 0.6s ease-out 0.2s both;
+}
 
-    /* Hide the default Streamlit anchor links */
-    .st-emotion-cache-11r0fvl {
-        display: none !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
+a.github-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1E293B;
+    color: #F8FAFC !important;
+    padding: 0.52rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+a.github-badge:hover {
+    background: #2563EB;
+    border-color: #3B82F6;
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+
+a.github-badge svg {
+    transition: transform 0.3s ease;
+}
+
+a.github-badge:hover svg {
+    transform: rotate(-8deg) scale(1.1);
+}
+
+/* 7. Animated Tech Stack Pills */
+.tech-stack {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    animation: staggerFade 0.6s ease-out 0.3s both;
+}
+
+.tech-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #ECE9E2;
+    color: #475569;
+    padding: 5px 13px;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border: 1px solid #DCD7CD;
+    transition: all 0.25s ease;
+    cursor: default;
+}
+
+.tech-badge:hover {
+    transform: translateY(-2px);
+    background-color: #E2DFD7;
+    border-color: #CBD5E1;
+    color: #0F172A;
+}
+
+.tech-badge.highlight {
+    background: linear-gradient(135deg, #EFF6FF 0%, #E0F2FE 100%);
+    color: #0369A1;
+    border: 1px solid #BAE6FD;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+}
+
+.tech-badge.highlight:hover {
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.16);
+    border-color: #7DD3FC;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    background-color: #10B981;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulseGlow 2s infinite;
+}
+
+/* 8. Uploader Label & Spinner */
+label, [data-testid="stSpinner"] div {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+}
+
+/* 9. Animated File Uploader Dropzone */
+[data-testid="stFileUploader"] {
+    animation: staggerFade 0.6s ease-out 0.4s both;
+}
+
+[data-testid="stFileUploadDropzone"] {
+    background-color: #F1EFEA !important;
+    border: 2px dashed #C8C2B8 !important;
+    border-radius: 14px !important;
+    padding: 1.65rem 1.5rem !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-testid="stFileUploadDropzone"]:hover {
+    border-color: #3B82F6 !important;
+    background-color: #EBF3FE !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.12) !important;
+}
+
+[data-testid="stFileUploadDropzone"] div, 
+[data-testid="stFileUploadDropzone"] span {
+    color: #57606A !important;
+}
+
+/* Upload Browse Button */
+[data-testid="stFileUploadDropzone"] button {
+    background-color: #F8F6F2 !important;
+    color: #1E293B !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 1rem !important;
+    font-weight: 600 !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-testid="stFileUploadDropzone"] button:hover {
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    border-color: #2563EB !important;
+    transform: scale(1.03);
+}
+
+/* 10. Uploaded File Pill & Success Banner */
+[data-testid="stUploadedFile"] {
+    background-color: #F4F2ED !important;
+    border: 1px solid #DFDBD2 !important;
+    border-radius: 10px !important;
+    animation: staggerFade 0.35s ease-out both;
+}
+
+[data-testid="stUploadedFile"] * {
+    color: #1E293B !important;
+}
+
+[data-testid="stAlert"] {
+    background-color: #ECFDF5 !important;
+    border: 1px solid #A7F3D0 !important;
+    border-radius: 10px !important;
+    padding: 0.7rem 1rem !important;
+    animation: staggerFade 0.4s ease-out both;
+}
+
+[data-testid="stAlert"] div {
+    color: #065F46 !important;
+    font-weight: 600 !important;
+}
+
+/* 11. Primary Animated Download Button */
+[data-testid="stDownloadButton"] button {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 1.35rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    animation: ctaPulse 2.5s infinite ease-in-out;
+}
+
+[data-testid="stDownloadButton"] button:hover {
+    background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.45) !important;
+}
+
+[data-testid="stDownloadButton"] button * {
+    color: #FFFFFF !important;
+}
+</style>
+
+<div class="hero-wrap">
+    <div class="custom-title">Kannada ASCII to Unicode Converter</div>
+    <div class="custom-subtitle">Upload your <code>.doc</code>, <code>.docx</code>, <code>.xls</code>, or <code>.xlsx</code> file to convert it to Unicode format.</div>
+</div>
+
+<div class="github-wrapper">
+    <a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">
+        <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+        Code Link : GitHub Repository
+    </a>
+</div>
+
+<div class="tech-stack">
+    <span class="tech-badge">🐍 Python</span>
+    <span class="tech-badge">⚡ Streamlit</span>
+    <span class="tech-badge highlight">
+        <span class="status-dot"></span>
+        Logic: Sanka + Sanchaya Converting Logics
+    </span>
+</div>
+""",
+    unsafe_allow_html=True,
 )
 
-# Custom Premium Header
-st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
-
-# Code Link (Sleek Dark Badge)
-st.markdown(
-    '<div class="github-wrapper"><a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">👨‍💻 View Source Code</a></div>',
-    unsafe_allow_html=True
-)
-
-# Tech Stack (Minimalist Pills)
-st.markdown(
-    '''
-    <div class="tech-stack">
-        <span class="tech-badge">Python</span>
-        <span class="tech-badge">Streamlit</span>
-        <span class="tech-badge highlight">⚙️ Logic: Sanka + Sanchaya Processing</span>
-    </div>
-    ''',
-    unsafe_allow_html=True
-)
 
 def get_secret(key, default=None):
     """Reads from Render Environment Variables first, then falls back to st.secrets."""
