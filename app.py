@@ -21,187 +21,190 @@ st.set_page_config(
     page_title="Kannada Unicode Converter", page_icon="🔤", layout="centered"
 )
 
-# Advanced CSS for an Eye-Care / Warm Paper Theme
+# Advanced CSS for a Minimalist Professional SaaS Theme
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     /* Global typography */
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
 
-    /* HIDE STREAMLIT'S DEFAULT TOP HEADER & MENU TO REMOVE DEAD SPACE */
+    /* Hide Streamlit header for a clean app-like feel */
     [data-testid="stHeader"] {
         display: none !important;
     }
 
-    /* Warm Sand background for the whole app to reduce glare */
+    /* Ultra-subtle light gray background for the app */
     .stApp, .stAppViewContainer {
-        background-color: #F4F1EB !important; 
+        background-color: #F9FAFB !important; 
     }
 
-    /* COMPACT CARD EFFECT: Warm Ivory/Paper instead of Pure White */
+    /* The Main App Card - Clean, sharp, subtle shadow */
     .block-container {
-        background-color: #FDFBF7 !important; /* Soft paper color */
-        padding: 2rem 2.5rem 2rem 2.5rem !important;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px -10px rgba(139, 126, 107, 0.15), 0 1px 3px rgba(139, 126, 107, 0.1);
-        max-width: 750px;
-        margin-top: 2rem !important;
-        margin-bottom: 1rem !important;
-        border: 1px solid #F0EBE1;
+        background-color: #FFFFFF !important;
+        padding: 2.5rem 3rem 3rem 3rem !important;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
+        max-width: 720px;
+        margin-top: 2.5rem !important;
+        margin-bottom: 2rem !important;
+        border: 1px solid #E5E7EB;
     }
 
-    /* Warm Deep Espresso Typography for Title (No harsh blacks) */
+    /* Professional, crisp typography */
     .custom-title {
         text-align: center;
-        font-size: 2.2rem;
-        font-weight: 800;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827; /* Deep charcoal, easier on the eyes than pure black */
         margin-bottom: 0.5rem; 
-        letter-spacing: -0.025em;
-        background: linear-gradient(135deg, #2D2723 0%, #5C554F 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
     }
 
     .custom-subtitle {
         text-align: center;
-        color: #736A62;
-        font-size: 1rem;
+        color: #6B7280;
+        font-size: 0.95rem;
         font-weight: 400;
-        margin-bottom: 1rem;
-        line-height: 1.4;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
     }
 
-    /* Calmer Muted Indigo Code Link Badge */
+    /* Sleek "GitHub/Vercel" style Code Link Button */
     .github-wrapper {
         text-align: center;
-        margin-bottom: 1rem; 
+        margin-bottom: 1.25rem; 
     }
     .github-badge {
         display: inline-flex;
         align-items: center;
-        background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
-        color: #FDFBF7 !important;
-        padding: 0.5rem 1.2rem;
-        border-radius: 9999px;
-        font-size: 0.9rem;
-        font-weight: 600;
+        background-color: #111827;
+        color: #FFFFFF !important;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
         text-decoration: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.2);
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     .github-badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
-        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+        background-color: #374151;
+        transform: translateY(-1px);
     }
 
-    /* Tech Stack Tags - Earthy Paper tones */
+    /* Tech Stack Tags - Clean minimalist pills */
     .tech-stack {
         display: flex;
         justify-content: center;
         gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
     .tech-badge {
-        background-color: #F0EBE1;
-        color: #5C554F;
-        padding: 4px 12px;
-        border-radius: 9999px;
+        background-color: #F3F4F6;
+        color: #4B5563;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-size: 0.75rem;
-        font-weight: 600;
-        border: 1px solid #E6DFD3;
+        font-weight: 500;
+        border: 1px solid #E5E7EB;
     }
     .tech-badge.highlight {
-        border-color: #C7D2FE;
-        color: #4338CA;
-        background-color: #EEF2FF;
+        border-color: #D1D5DB;
+        color: #111827;
+        background-color: #FFFFFF;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
 
-    /* Fix General Text (Spinners, labels) */
+    /* Fix General Text */
     label, [data-testid="stSpinner"] div {
-        color: #443F3B !important;
-        font-weight: 600 !important;
+        color: #374151 !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
     }
 
-    /* The Main Uploader Dropzone - Warm Beige */
+    /* The Main Uploader Dropzone - Professional and inviting */
     [data-testid="stFileUploadDropzone"] {
-        background-color: #F4F1EB !important;
-        border: 2px dashed #D6D0C4 !important;
-        border-radius: 16px !important;
+        background-color: #FAFAFA !important;
+        border: 1px dashed #D1D5DB !important;
+        border-radius: 8px !important;
         padding: 2rem !important; 
-        transition: all 0.3s ease-in-out;
+        transition: all 0.2s ease-in-out;
     }
     [data-testid="stFileUploadDropzone"]:hover {
-        border-color: #6366F1 !important;
-        background-color: #EEF2FF !important;
+        border-color: #3B82F6 !important;
+        background-color: #EFF6FF !important;
     }
     
     [data-testid="stFileUploadDropzone"] div, 
     [data-testid="stFileUploadDropzone"] span {
-        color: #736A62 !important;
+        color: #6B7280 !important;
     }
 
     /* The 'Browse Files' button */
     [data-testid="stFileUploadDropzone"] button {
-        background-color: #FDFBF7 !important;
-        color: #2D2723 !important;
-        border: 1px solid #D6D0C4 !important;
-        border-radius: 8px !important;
-        padding: 0.4rem 1rem !important;
-        font-weight: 600 !important;
+        background-color: #FFFFFF !important;
+        color: #111827 !important;
+        border: 1px solid #D1D5DB !important;
+        border-radius: 6px !important;
+        padding: 0.35rem 0.8rem !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
     [data-testid="stFileUploadDropzone"] button:hover {
-        background-color: #F0EBE1 !important;
-        border-color: #A8A29A !important;
+        background-color: #F9FAFB !important;
+        border-color: #9CA3AF !important;
     }
     
     /* Uploaded File Card */
     [data-testid="stUploadedFile"] {
-        background-color: #FDFBF7 !important;
-        border: 1px solid #E6DFD3 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 6px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
     }
     [data-testid="stUploadedFile"] * {
-        color: #2D2723 !important;
+        color: #111827 !important;
     }
 
-    /* Success Box Customization */
+    /* Success Box Customization - Corporate green */
     [data-testid="stAlert"] {
-        background-color: #EEFBEB !important;
-        border: 1px solid #BFEFB4 !important;
-        border-radius: 10px !important;
-        color: #2E5C23 !important;
+        background-color: #F0FDF4 !important;
+        border: 1px solid #BBF7D0 !important;
+        border-radius: 6px !important;
+        color: #166534 !important;
+        padding: 0.75rem !important;
     }
     [data-testid="stAlert"] div {
-        color: #2E5C23 !important;
+        color: #166534 !important;
         font-weight: 500;
     }
 
-    /* Download Button Alignment */
+    /* Download Button - Primary CTA styling */
     [data-testid="baseButton-secondary"] {
-        background-color: #FDFBF7 !important;
-        color: #2D2723 !important;
-        border: 1px solid #D6D0C4 !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        padding: 0.5rem 1rem !important;
+        box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1) !important;
         transition: all 0.2s;
     }
     [data-testid="baseButton-secondary"]:hover {
-        border-color: #4F46E5 !important;
-        color: #4F46E5 !important;
-        background-color: #EEF2FF !important;
+        background-color: #1D4ED8 !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
+        transform: translateY(-1px);
     }
 
-    /* Hide the default Streamlit anchor links next to headers */
+    /* Hide the default Streamlit anchor links */
     .st-emotion-cache-11r0fvl {
         display: none !important;
     }
@@ -211,16 +214,16 @@ st.markdown(
 )
 
 # Custom Premium Header
-st.markdown('<div class="custom-title">MI - Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-title">Kannada ASCII to Unicode Converter</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-subtitle">Upload your .doc, .docx, .xls, or .xlsx file to convert it to Unicode format.</div>', unsafe_allow_html=True)
 
-# Code Link (Elevated UI)
+# Code Link (Sleek Dark Badge)
 st.markdown(
     '<div class="github-wrapper"><a href="https://github.com/NethenDatascientist/NUDI-to-Unicode-converter" target="_blank" class="github-badge">👨‍💻 View Source Code</a></div>',
     unsafe_allow_html=True
 )
 
-# Tech Stack & Logic Details
+# Tech Stack (Minimalist Pills)
 st.markdown(
     '''
     <div class="tech-stack">
